@@ -1,0 +1,26 @@
+{
+  "name": "mscs-arena",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint app src --ext .ts,.tsx",
+    "test": "TMPDIR=/tmp TEMP=/tmp TMP=/tmp tsx --test src/lib/programs.test.ts"
+  },
+  "dependencies": {
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.22.0",
+    "eslint-config-next": "16.2.1",
+    "tsx": "^4.20.6",
+    "typescript": "5.8.2"
+  }
+}
