@@ -1,0 +1,30 @@
+{
+  "id": "stanford-mscs",
+  "schoolName": "Stanford University",
+  "programName": "MS in Computer Science",
+  "degreeType": "MS",
+  "locationCity": "Stanford",
+  "locationState": "CA",
+  "locationType": "suburb",
+  "duration": "2 years",
+  "creditHours": 45,
+  "deliveryMode": "On campus",
+  "thesisOption": "Thesis optional",
+  "researchOrientation": 0.72,
+  "industryOrientation": 0.48,
+  "cohortSize": 85,
+  "tuitionTotalUsd": 64140,
+  "references": {
+    "openCsUrl": "https://www.opencs.dev/",
+    "nicheUrl": "https://www.niche.com/colleges/stanford-university/"
+  },
+  "rankings": {
+    "usNewsUndergrad": 3,
+    "csrankings": 2,
+    "openCs": 4
+  },
+  "notes": [
+    "Sample local record for UI scaffolding.",
+    "OpenCS link is a project placeholder until program-specific pages are curated."
+  ]
+}

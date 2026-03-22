@@ -1,0 +1,34 @@
+{
+  "rankings": {
+    "bands": [
+      { "max": 10, "grade": "A" },
+      { "max": 20, "grade": "B" },
+      { "max": 40, "grade": "C" },
+      { "max": 70, "grade": "D" },
+      { "max": null, "grade": "E" }
+    ]
+  },
+  "tuition": {
+    "estimatedCredits": 30,
+    "bands": [
+      { "max": 30000, "grade": "A" },
+      { "max": 50000, "grade": "B" },
+      { "max": 70000, "grade": "C" },
+      { "max": 90000, "grade": "D" },
+      { "max": null, "grade": "E" }
+    ]
+  },
+  "cohortSize": {
+    "bands": [
+      { "max": 60, "grade": "A" },
+      { "max": 120, "grade": "B" },
+      { "max": 200, "grade": "C" },
+      { "max": 300, "grade": "D" },
+      { "max": null, "grade": "E" }
+    ]
+  },
+  "locationType": {
+    "city": "A",
+    "suburb": "C"
+  }
+}
