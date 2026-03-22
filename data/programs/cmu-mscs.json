@@ -1,0 +1,29 @@
+{
+  "id": "cmu-mscs",
+  "schoolName": "Carnegie Mellon University",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "locationCity": "Pittsburgh",
+  "locationState": "PA",
+  "locationType": "city",
+  "duration": "2 years",
+  "creditHours": 144,
+  "deliveryMode": "On campus",
+  "thesisOption": "Thesis optional",
+  "researchOrientation": 0.66,
+  "industryOrientation": 0.62,
+  "cohortSize": 60,
+  "tuitionTotalUsd": 78200,
+  "references": {
+    "openCsUrl": "https://www.opencs.dev/",
+    "nicheUrl": "https://www.niche.com/colleges/carnegie-mellon-university/"
+  },
+  "rankings": {
+    "usNewsUndergrad": 4,
+    "csrankings": 1,
+    "openCs": 3
+  },
+  "notes": [
+    "Credits reflect CMU's unit system for the sample dataset."
+  ]
+}
