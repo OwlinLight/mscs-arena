@@ -1,0 +1,7 @@
+{
+  "programs": [
+    { "file": "stanford-mscs.json" },
+    { "file": "cmu-mscs.json" },
+    { "file": "uw-mscs.json" }
+  ]
+}

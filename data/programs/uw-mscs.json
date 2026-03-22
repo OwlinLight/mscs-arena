@@ -1,0 +1,28 @@
+{
+  "id": "uw-mscs",
+  "schoolName": "University of Washington",
+  "programName": "Master of Science in Computer Science & Engineering",
+  "degreeType": "MS",
+  "locationCity": "Seattle",
+  "locationState": "WA",
+  "locationType": "city",
+  "duration": "2 years",
+  "creditHours": 45,
+  "deliveryMode": "On campus",
+  "thesisOption": "Thesis required",
+  "researchOrientation": 0.82,
+  "industryOrientation": 0.34,
+  "tuitionPerCreditUsd": 1200,
+  "references": {
+    "openCsUrl": "https://www.opencs.dev/",
+    "nicheUrl": "https://www.niche.com/graduate-schools/university-of-washington/programs/"
+  },
+  "rankings": {
+    "usNewsUndergrad": 7,
+    "csrankings": 9,
+    "openCs": 8
+  },
+  "notes": [
+    "Cohort size intentionally omitted to demonstrate missing-data rendering."
+  ]
+}
