@@ -88,6 +88,7 @@ export type ProgramView = ProgramRecord & {
   validation: ValidationResult;
   researchIndustryLabel: string;
   radarScores: Record<RadarAxisKey, Grade | null>;
+  radarDetails: Record<RadarAxisKey, string>;
 };
 
 const REQUIRED_STRING_FIELDS = ["id", "schoolName", "programName", "degreeType"] as const;
@@ -215,6 +216,20 @@ export function deriveProgramView(record: ProgramRecord, scoringConfig: ScoringC
         scoringConfig,
       ),
     },
+    radarDetails: {
+      prestigeScore: formatRadarDetail(
+        "US News undergrad rank",
+        formatRankDetail(record.rankings?.usNewsUndergrad),
+      ),
+      majorScore: formatRadarDetail(
+        "CSRankings rank",
+        formatRankDetail(record.rankings?.csrankings),
+      ),
+      difficultyScore: formatRadarDetail("OpenCS rank", formatRankDetail(record.rankings?.openCs)),
+      locationScore: formatRadarDetail("Location", formatLocationDetail(record)),
+      cohortScore: formatRadarDetail("Cohort size", formatCountDetail(record.cohortSize, "students")),
+      tuitionScore: formatRadarDetail("Tuition", formatTuitionDetail(record, scoringConfig)),
+    },
   };
 }
 
@@ -341,4 +356,47 @@ function validateBands(bands: Band[] | undefined, path: string) {
       throw new Error(`${path} entries must contain a valid grade and positive max or null.`);
     }
   }
+}
+
+function formatRadarDetail(label: string, value: string): string {
+  return `${label}: ${value}`;
+}
+
+function formatRankDetail(value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  return `#${formatNumber(value)}`;
+}
+
+function formatCountDetail(value: number | undefined, unit: string): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  return `${formatNumber(value)} ${unit}`;
+}
+
+function formatLocationDetail(record: ProgramRecord): string {
+  const city = record.locationCity ?? "N/A";
+  const state = record.locationState ? `, ${record.locationState}` : "";
+  const type = record.locationType ? ` (${record.locationType})` : "";
+  return `${city}${state}${type}`;
+}
+
+function formatTuitionDetail(record: ProgramRecord, scoringConfig: ScoringConfig): string {
+  if (typeof record.tuitionTotalUsd === "number" && Number.isFinite(record.tuitionTotalUsd)) {
+    return `${formatCurrency(record.tuitionTotalUsd)} total`;
+  }
+
+  if (
+    typeof record.tuitionPerCreditUsd === "number" &&
+    Number.isFinite(record.tuitionPerCreditUsd)
+  ) {
+    const estimatedTotal = record.tuitionPerCreditUsd * scoringConfig.tuition.estimatedCredits;
+    return `${formatCurrency(record.tuitionPerCreditUsd)} per credit (${formatCurrency(estimatedTotal)} estimated total)`;
+  }
+
+  return "N/A";
 }

@@ -144,6 +144,8 @@ test("deriveProgramView creates a research vs industry label and radar scores", 
     cohortScore: "B",
     tuitionScore: "A",
   });
+  assert.equal(result.radarDetails.prestigeScore, "US News undergrad rank: #8");
+  assert.equal(result.radarDetails.tuitionScore, "Tuition: $1,000 per credit ($30,000 estimated total)");
 });
 
 test("gradeToValue maps A-E and returns null for missing grades", () => {

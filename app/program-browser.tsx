@@ -86,109 +86,138 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
         ) : (
           <section className="program-grid">
             {filteredPrograms.map((program) => (
-              <article className="program-card" key={program.id}>
-                <header className="program-header">
-                  <div>
-                    <p className="program-school">{program.schoolName}</p>
-                    <h2>{program.programName}</h2>
-                    <p className="program-degree">{program.degreeType}</p>
-                  </div>
-                  {program.validation.valid ? null : (
-                    <span className="warning-badge">Validation warnings</span>
-                  )}
-                </header>
-
-                <section className="section-block">
-                  <h3>Basic program info</h3>
-                  <dl className="info-list">
-                    <InfoRow label="Location" value={formatLocation(program)} />
-                    <InfoRow label="Duration / Credits" value={formatDuration(program)} />
-                    <InfoRow label="Thesis" value={program.thesisOption ?? "N/A"} />
-                    <InfoRow
-                      label="Research vs Industry"
-                      value={`${program.researchIndustryLabel} - course design & thesis requirement`}
-                    />
-                    <InfoRow label="Delivery mode" value={program.deliveryMode ?? "N/A"} />
-                  </dl>
-                </section>
-
-                <section className="section-block">
-                  <h3>Radar chart including (map to ABCDE)</h3>
-                  <div className="chart-wrap">
-                    <RadarChart program={program} />
-                    <ul className="score-list">
-                      {RADAR_AXES.map((axis) => (
-                        <li key={axis.key}>
-                          <span>{axis.label}</span>
-                          <strong>{program.radarScores[axis.key] ?? "N/A"}</strong>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-
-                <section className="section-block">
-                  <h3>Reference</h3>
-                  <div className="reference-list">
-                    <ReferenceChip label="OpenCS Page" url={program.references?.openCsUrl} />
-                    <ReferenceChip label="Niche Page" url={program.references?.nicheUrl} />
-                  </div>
-                </section>
-
-                <section className="section-block">
-                  <h3>Fields including</h3>
-                  <dl className="info-list">
-                    <InfoRow
-                      label="Tuition"
-                      value={
-                        Number.isFinite(program.tuitionTotalUsd)
-                          ? `${formatCurrency(program.tuitionTotalUsd)} total`
-                          : Number.isFinite(program.tuitionPerCreditUsd)
-                            ? `${formatCurrency(program.tuitionPerCreditUsd)} per credit`
-                            : "N/A"
-                      }
-                    />
-                    <InfoRow label="Duration" value={program.duration ?? "N/A"} />
-                    <InfoRow label="Credits" value={formatNumber(program.creditHours)} />
-                    <InfoRow label="Location" value={formatLocation(program)} />
-                    <InfoRow label="Cohort size" value={formatNumber(program.cohortSize)} />
-                    <InfoRow label="Thesis option" value={program.thesisOption ?? "N/A"} />
-                    <InfoRow
-                      label="Research vs industry orientation"
-                      value={program.researchIndustryLabel}
-                    />
-                    <InfoRow label="Delivery mode" value={program.deliveryMode ?? "N/A"} />
-                    <InfoRow
-                      label="Ranking inputs"
-                      value={[
-                        `US News ${program.rankings?.usNewsUndergrad ?? "N/A"}`,
-                        `CSRankings ${program.rankings?.csrankings ?? "N/A"}`,
-                        `OpenCS ${program.rankings?.openCs ?? "N/A"}`,
-                      ].join(" / ")}
-                    />
-                    <InfoRow
-                      label="Notes"
-                      value={program.notes?.length ? program.notes.join(" | ") : "N/A"}
-                    />
-                  </dl>
-                </section>
-
-                {program.validation.valid ? null : (
-                  <section className="section-block warning-list">
-                    <h3>Validation details</h3>
-                    <ul>
-                      {program.validation.errors.map((error) => (
-                        <li key={error}>{error}</li>
-                      ))}
-                    </ul>
-                  </section>
-                )}
-              </article>
+              <ProgramCard key={program.id} program={program} />
             ))}
           </section>
         )}
       </div>
     </div>
+  );
+}
+
+function ProgramCard({ program }: { program: ProgramView }) {
+  const [activeAxis, setActiveAxis] = useState<(typeof RADAR_AXES)[number]["key"]>(
+    RADAR_AXES[0].key,
+  );
+
+  const activeAxisMeta = RADAR_AXES.find((axis) => axis.key === activeAxis) ?? RADAR_AXES[0];
+
+  return (
+    <article className="program-card">
+      <header className="program-header">
+        <div>
+          <p className="program-school">{program.schoolName}</p>
+          <h2>{program.programName}</h2>
+          <p className="program-degree">{program.degreeType}</p>
+        </div>
+        {program.validation.valid ? null : (
+          <span className="warning-badge">Validation warnings</span>
+        )}
+      </header>
+
+      <section className="section-block">
+        <h3>Basic program info</h3>
+        <dl className="info-list">
+          <InfoRow label="Location" value={formatLocation(program)} />
+          <InfoRow label="Duration / Credits" value={formatDuration(program)} />
+          <InfoRow label="Thesis" value={program.thesisOption ?? "N/A"} />
+          <InfoRow
+            label="Research vs Industry"
+            value={`${program.researchIndustryLabel} - course design & thesis requirement`}
+          />
+          <InfoRow label="Delivery mode" value={program.deliveryMode ?? "N/A"} />
+        </dl>
+      </section>
+
+      <section className="section-block">
+        <h3>Radar chart including (map to ABCDE)</h3>
+        <div className="chart-wrap">
+          <RadarChart program={program} activeAxis={activeAxis} onAxisHover={setActiveAxis} />
+          <div className="radar-side-panel">
+            <div className="radar-detail-card">
+              <p className="radar-detail-kicker">Axis detail</p>
+              <h4>{activeAxisMeta.label}</h4>
+              <p>{program.radarDetails[activeAxisMeta.key]}</p>
+              <strong>Grade {program.radarScores[activeAxisMeta.key] ?? "N/A"}</strong>
+            </div>
+
+            <ul className="score-list">
+              {RADAR_AXES.map((axis) => (
+                <li key={axis.key} className="score-item">
+                  <button
+                    type="button"
+                    className={activeAxis === axis.key ? "score-axis-button active" : "score-axis-button"}
+                    onMouseEnter={() => setActiveAxis(axis.key)}
+                    onFocus={() => setActiveAxis(axis.key)}
+                    onClick={() => setActiveAxis(axis.key)}
+                  >
+                    {axis.label}
+                  </button>
+                  <strong>{program.radarScores[axis.key] ?? "N/A"}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-block">
+        <h3>Reference</h3>
+        <div className="reference-list">
+          <ReferenceChip label="OpenCS Page" url={program.references?.openCsUrl} />
+          <ReferenceChip label="Niche Page" url={program.references?.nicheUrl} />
+        </div>
+      </section>
+
+      <section className="section-block">
+        <h3>Fields including</h3>
+        <dl className="info-list">
+          <InfoRow
+            label="Tuition"
+            value={
+              Number.isFinite(program.tuitionTotalUsd)
+                ? `${formatCurrency(program.tuitionTotalUsd)} total`
+                : Number.isFinite(program.tuitionPerCreditUsd)
+                  ? `${formatCurrency(program.tuitionPerCreditUsd)} per credit`
+                  : "N/A"
+            }
+          />
+          <InfoRow label="Duration" value={program.duration ?? "N/A"} />
+          <InfoRow label="Credits" value={formatNumber(program.creditHours)} />
+          <InfoRow label="Location" value={formatLocation(program)} />
+          <InfoRow label="Cohort size" value={formatNumber(program.cohortSize)} />
+          <InfoRow label="Thesis option" value={program.thesisOption ?? "N/A"} />
+          <InfoRow
+            label="Research vs industry orientation"
+            value={program.researchIndustryLabel}
+          />
+          <InfoRow label="Delivery mode" value={program.deliveryMode ?? "N/A"} />
+          <InfoRow
+            label="Ranking inputs"
+            value={[
+              `US News ${program.rankings?.usNewsUndergrad ?? "N/A"}`,
+              `CSRankings ${program.rankings?.csrankings ?? "N/A"}`,
+              `OpenCS ${program.rankings?.openCs ?? "N/A"}`,
+            ].join(" / ")}
+          />
+          <InfoRow
+            label="Notes"
+            value={program.notes?.length ? program.notes.join(" | ") : "N/A"}
+          />
+        </dl>
+      </section>
+
+      {program.validation.valid ? null : (
+        <section className="section-block warning-list">
+          <h3>Validation details</h3>
+          <ul>
+            {program.validation.errors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </article>
   );
 }
 
@@ -213,7 +242,15 @@ function ReferenceChip({ label, url }: { label: string; url?: string }) {
   );
 }
 
-function RadarChart({ program }: { program: ProgramView }) {
+function RadarChart({
+  program,
+  activeAxis,
+  onAxisHover,
+}: {
+  program: ProgramView;
+  activeAxis: (typeof RADAR_AXES)[number]["key"];
+  onAxisHover: (axis: (typeof RADAR_AXES)[number]["key"]) => void;
+}) {
   const center = 110;
   const radius = 72;
   const levels = 5;
@@ -258,9 +295,23 @@ function RadarChart({ program }: { program: ProgramView }) {
             y2={center + Math.sin(point.angle) * radius}
             className="grid-axis"
           />
-          <text x={point.labelX} y={point.labelY} className="axis-label">
-            {point.axis.label}
-          </text>
+          <foreignObject
+            x={point.labelX - 34}
+            y={point.labelY - 12}
+            width="68"
+            height="26"
+            className="axis-label-wrap"
+          >
+            <button
+              type="button"
+              className={activeAxis === point.axis.key ? "axis-label-button active" : "axis-label-button"}
+              onMouseEnter={() => onAxisHover(point.axis.key)}
+              onFocus={() => onAxisHover(point.axis.key)}
+              onClick={() => onAxisHover(point.axis.key)}
+            >
+              <span className="axis-label-text">{point.axis.label}</span>
+            </button>
+          </foreignObject>
         </g>
       ))}
 

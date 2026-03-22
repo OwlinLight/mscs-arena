@@ -236,6 +236,7 @@ code {
 
 .program-card {
   padding: 22px;
+  font-size: 1.04rem;
 }
 
 .program-header {
@@ -252,7 +253,7 @@ code {
 }
 
 .program-school {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--accent);
   font-weight: 700;
 }
@@ -260,8 +261,12 @@ code {
 .program-header h2 {
   margin: 4px 0 6px;
   font-family: var(--font-serif);
-  font-size: 1.85rem;
+  font-size: 2rem;
   line-height: 1.1;
+}
+
+.program-degree {
+  font-size: 1rem;
 }
 
 .warning-badge {
@@ -282,7 +287,7 @@ code {
 
 .section-block h3 {
   margin: 0 0 14px;
-  font-size: 1rem;
+  font-size: 1.08rem;
 }
 
 .info-list {
@@ -309,13 +314,19 @@ code {
 
 .info-list dt {
   font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.info-list dd {
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
 .chart-wrap {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-  justify-items: center;
+  grid-template-columns: minmax(220px, 320px) minmax(220px, 1fr);
+  gap: 16px;
+  align-items: start;
 }
 
 .radar-chart {
@@ -348,6 +359,88 @@ code {
   dominant-baseline: middle;
 }
 
+.axis-label-wrap {
+  overflow: visible;
+}
+
+.axis-label-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 248, 236, 0.88);
+  color: var(--text);
+  font-size: 8.4px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+.axis-label-button,
+.score-axis-button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.axis-label-button {
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+}
+
+.axis-label-button.active .axis-label-text,
+.axis-label-button:hover .axis-label-text,
+.axis-label-button:focus-visible .axis-label-text {
+  background: rgba(180, 83, 9, 0.16);
+  color: var(--accent);
+}
+
+.radar-side-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.radar-detail-card {
+  padding: 14px 16px;
+  border: 1px solid rgba(180, 83, 9, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 248, 236, 0.78);
+}
+
+.radar-detail-kicker {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.radar-detail-card h4 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.radar-detail-card p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.radar-detail-card strong {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
 .score-list {
   width: 100%;
   list-style: none;
@@ -360,6 +453,24 @@ code {
   gap: 10px;
   padding: 6px 0;
   border-bottom: 1px dashed rgba(95, 78, 58, 0.16);
+}
+
+.score-item span:first-child {
+  min-width: 0;
+}
+
+.score-axis-button {
+  min-width: 0;
+  padding: 0;
+  color: var(--text);
+  font-size: 0.98rem;
+  text-align: left;
+}
+
+.score-axis-button.active,
+.score-axis-button:hover,
+.score-axis-button:focus-visible {
+  color: var(--accent);
 }
 
 .score-list li:last-child {
@@ -413,6 +524,10 @@ code {
 
   .filter-sidebar {
     position: static;
+  }
+
+  .chart-wrap {
+    grid-template-columns: 1fr;
   }
 }
 
