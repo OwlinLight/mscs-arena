@@ -4,7 +4,6 @@ import assert from "node:assert/strict";
 import scoringConfigJson from "@/data/scoring-config.json";
 import {
   deriveProgramView,
-  getPrograms,
   gradeFromAcceptanceRate,
   gradeFromBands,
   gradeFromEmployerDensity,
@@ -15,6 +14,7 @@ import {
   loadScoringConfig,
   validateProgramRecord,
 } from "@/src/lib/programs";
+import { getPrograms } from "@/src/lib/programs.server";
 
 const scoringConfig = loadScoringConfig(scoringConfigJson as Parameters<typeof loadScoringConfig>[0]);
 
@@ -185,8 +185,10 @@ test("gradeToValue maps A-E and returns null for missing grades", () => {
 test("getPrograms loads all indexed programs and preserves missing-data warnings", () => {
   const programs = getPrograms();
 
-  assert.equal(programs.length, 3);
-  assert.equal(programs[0]?.schoolName, "Stanford University");
-  assert.equal(programs[2]?.radarScores.livingCostScore, null);
+  assert.equal(programs.length, 31);
+  assert.equal(programs[0]?.schoolName, "Princeton University");
+  assert.equal(programs.find((program) => program.id === "uw-mscs")?.radarScores.livingCostScore, "B");
+  assert.equal(programs.some((program) => program.id === "uiuc-mscs"), true);
+  assert.equal(programs.some((program) => program.id === "uiuc-mcs"), true);
   assert.equal(programs.every((program) => program.validation.valid), true);
 });

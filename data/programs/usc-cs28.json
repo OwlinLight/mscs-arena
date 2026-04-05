@@ -1,0 +1,13 @@
+{
+  "id": "usc-cs28",
+  "schoolName": "University of Southern California",
+  "programName": "Master of Science in Computer Science (CS28)",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/CS28%40USC/"
+  },
+  "notes": [
+    "OpenCS tier: B+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

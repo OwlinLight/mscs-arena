@@ -1,0 +1,13 @@
+{
+  "id": "yale-two-year-mscs",
+  "schoolName": "Yale University",
+  "programName": "Two-Year Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/Two-Year%20MSCS%40Yale/"
+  },
+  "notes": [
+    "OpenCS tier: SS",
+    "Seeded from the OpenCS grade list."
+  ]
+}

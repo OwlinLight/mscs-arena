@@ -1,0 +1,13 @@
+{
+  "id": "ubc-mscs",
+  "schoolName": "The University of British Columbia",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40UBC/"
+  },
+  "notes": [
+    "OpenCS tier: A+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

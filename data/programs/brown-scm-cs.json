@@ -1,0 +1,13 @@
+{
+  "id": "brown-scm-cs",
+  "schoolName": "Brown University",
+  "programName": "ScM in Computer Science",
+  "degreeType": "ScM",
+  "references": {
+    "openCsUrl": "https://opencs.app/ScM%20CS%40Brown/"
+  },
+  "notes": [
+    "OpenCS tier: A-",
+    "Seeded from the OpenCS grade list."
+  ]
+}

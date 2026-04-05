@@ -1,9 +1,3 @@
-import programIndexJson from "@/data/programs/index.json";
-import scoringConfigJson from "@/data/scoring-config.json";
-import cmuProgramJson from "@/data/programs/cmu-mscs.json";
-import stanfordProgramJson from "@/data/programs/stanford-mscs.json";
-import uwProgramJson from "@/data/programs/uw-mscs.json";
-
 export const RADAR_AXES = [
   { key: "prestigeScore" },
   { key: "majorScore" },
@@ -14,8 +8,23 @@ export const RADAR_AXES = [
 ] as const;
 
 export const GRADE_ORDER = ["A", "B", "C", "D", "E"] as const;
+export const OPEN_CS_TIER_ORDER = [
+  "SSS",
+  "SS",
+  "S",
+  "A+",
+  "A",
+  "A-",
+  "B+",
+  "B",
+  "B-",
+  "C+",
+  "C",
+  "待分类",
+] as const;
 
 type Grade = (typeof GRADE_ORDER)[number];
+type OpenCsTier = (typeof OPEN_CS_TIER_ORDER)[number];
 export type RadarAxisKey = (typeof RADAR_AXES)[number]["key"];
 
 type Band = {
@@ -41,6 +50,7 @@ export type ProgramRecord = {
   schoolName: string;
   programName: string;
   degreeType: string;
+  openCsTier?: OpenCsTier;
   acceptanceRate?: number;
   employerDensity?: number;
   locationCity?: string;
@@ -100,14 +110,6 @@ export type ProgramView = ProgramRecord & {
 };
 
 const REQUIRED_STRING_FIELDS = ["id", "schoolName", "programName", "degreeType"] as const;
-const programIndexData = programIndexJson as ProgramIndexResponse;
-const scoringConfigData = scoringConfigJson as ScoringConfig;
-
-const programFiles: Record<string, ProgramRecord> = {
-  "cmu-mscs.json": cmuProgramJson,
-  "stanford-mscs.json": stanfordProgramJson,
-  "uw-mscs.json": uwProgramJson,
-};
 
 export function loadProgramIndex(indexResponse: ProgramIndexResponse): ProgramIndexEntry[] {
   if (!Array.isArray(indexResponse?.programs)) {
@@ -195,6 +197,7 @@ export function validateProgramRecord(record: Partial<ProgramRecord>): Validatio
 
 export function deriveProgramView(record: ProgramRecord, scoringConfig: ScoringConfig): ProgramView {
   const validation = validateProgramRecord(record);
+  const tierFallbackGrade = gradeFromOpenCsTier(record.openCsTier);
 
   return {
     ...record,
@@ -204,29 +207,36 @@ export function deriveProgramView(record: ProgramRecord, scoringConfig: ScoringC
       record.industryOrientation,
     ),
     radarScores: {
-      prestigeScore: gradeFromRank(record.rankings?.usNewsUndergrad, scoringConfig),
-      majorScore: gradeFromRank(record.rankings?.csrankings, scoringConfig),
-      difficultyScore: gradeFromAcceptanceRate(record.acceptanceRate, scoringConfig),
-      locationScore: gradeFromEmployerDensity(record.employerDensity, scoringConfig),
-      livingCostScore: gradeFromLivingCost(record.livingCostUsd, scoringConfig),
-      tuitionScore: gradeFromTuition(
-        record.tuitionTotalUsd,
-        record.tuitionPerCreditUsd,
-        scoringConfig,
-      ),
+      prestigeScore: gradeFromRank(record.rankings?.usNewsUndergrad, scoringConfig) ?? tierFallbackGrade,
+      majorScore: gradeFromRank(record.rankings?.csrankings, scoringConfig) ?? tierFallbackGrade,
+      difficultyScore: gradeFromAcceptanceRate(record.acceptanceRate, scoringConfig) ?? tierFallbackGrade,
+      locationScore: gradeFromEmployerDensity(record.employerDensity, scoringConfig) ?? tierFallbackGrade,
+      livingCostScore: gradeFromLivingCost(record.livingCostUsd, scoringConfig) ?? tierFallbackGrade,
+      tuitionScore:
+        gradeFromTuition(record.tuitionTotalUsd, record.tuitionPerCreditUsd, scoringConfig) ??
+        tierFallbackGrade,
     },
     radarDetails: {
       prestigeScore: formatRadarDetail(
         "US News undergrad rank",
-        formatRankDetail(record.rankings?.usNewsUndergrad),
+        formatRankDetail(record.rankings?.usNewsUndergrad, record.openCsTier),
       ),
       majorScore: formatRadarDetail(
         "CSRankings rank",
-        formatRankDetail(record.rankings?.csrankings),
+        formatRankDetail(record.rankings?.csrankings, record.openCsTier),
       ),
-      difficultyScore: formatRadarDetail("Acceptance rate", formatAcceptanceRateDetail(record.acceptanceRate)),
-      locationScore: formatRadarDetail("Employer density", formatEmployerDensityDetail(record.employerDensity)),
-      livingCostScore: formatRadarDetail("Living cost", formatLivingCostDetail(record.livingCostUsd)),
+      difficultyScore: formatRadarDetail(
+        "Acceptance rate",
+        formatAcceptanceRateDetail(record.acceptanceRate, record.openCsTier),
+      ),
+      locationScore: formatRadarDetail(
+        "Employer density",
+        formatEmployerDensityDetail(record.employerDensity, record.openCsTier),
+      ),
+      livingCostScore: formatRadarDetail(
+        "Living cost",
+        formatLivingCostDetail(record.livingCostUsd, record.openCsTier),
+      ),
       tuitionScore: formatRadarDetail("Tuition", formatTuitionDetail(record, scoringConfig)),
     },
   };
@@ -317,6 +327,30 @@ export function gradeFromBands(value: number, bands: Band[]): Grade | null {
   return null;
 }
 
+export function gradeFromOpenCsTier(tier: OpenCsTier | undefined): Grade | null {
+  switch (tier) {
+    case "SSS":
+    case "SS":
+      return "A";
+    case "S":
+    case "A+":
+      return "B";
+    case "A":
+    case "A-":
+      return "C";
+    case "B+":
+    case "B":
+    case "待分类":
+      return "D";
+    case "B-":
+    case "C+":
+    case "C":
+      return "E";
+    default:
+      return null;
+  }
+}
+
 export function formatCurrency(value: number | undefined): string {
   if (typeof value !== "number" || !Number.isFinite(value)) return "N/A";
   return new Intl.NumberFormat("en-US", {
@@ -329,25 +363,6 @@ export function formatCurrency(value: number | undefined): string {
 export function formatNumber(value: number | undefined): string {
   if (typeof value !== "number" || !Number.isFinite(value)) return "N/A";
   return new Intl.NumberFormat("en-US").format(value);
-}
-
-export function getPrograms(): ProgramView[] {
-  const scoringConfig = loadScoringConfig(scoringConfigData);
-  const entries = loadProgramIndex(programIndexData);
-
-  return entries.map((entry) => {
-    const record = programFiles[entry.file];
-
-    if (!record) {
-      throw new Error(`Program file "${entry.file}" is missing from the local dataset.`);
-    }
-
-    return deriveProgramView(record, scoringConfig);
-  });
-}
-
-export function getScoringConfig(): ScoringConfig {
-  return loadScoringConfig(scoringConfigData);
 }
 
 function validateBands(bands: Band[] | undefined, path: string) {
@@ -369,9 +384,9 @@ function formatRadarDetail(label: string, value: string): string {
   return `${label}: ${value}`;
 }
 
-function formatRankDetail(value: number | undefined): string {
+function formatRankDetail(value: number | undefined, tier?: OpenCsTier): string {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    return "N/A";
+    return formatTierFallbackDetail(tier);
   }
 
   return `#${formatNumber(value)}`;
@@ -385,25 +400,25 @@ function formatCountDetail(value: number | undefined, unit: string): string {
   return `${formatNumber(value)} ${unit}`;
 }
 
-function formatAcceptanceRateDetail(value: number | undefined): string {
+function formatAcceptanceRateDetail(value: number | undefined, tier?: OpenCsTier): string {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    return "N/A";
+    return formatTierFallbackDetail(tier);
   }
 
   return `${formatNumber(value)}%`;
 }
 
-function formatEmployerDensityDetail(value: number | undefined): string {
+function formatEmployerDensityDetail(value: number | undefined, tier?: OpenCsTier): string {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    return "N/A";
+    return formatTierFallbackDetail(tier);
   }
 
   return formatNumber(value);
 }
 
-function formatLivingCostDetail(value: number | undefined): string {
+function formatLivingCostDetail(value: number | undefined, tier?: OpenCsTier): string {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    return "N/A";
+    return formatTierFallbackDetail(tier);
   }
 
   return `${formatCurrency(value)} / month`;
@@ -429,5 +444,9 @@ function formatTuitionDetail(record: ProgramRecord, scoringConfig: ScoringConfig
     return `${formatCurrency(record.tuitionPerCreditUsd)} per credit (${formatCurrency(estimatedTotal)} estimated total)`;
   }
 
-  return "N/A";
+  return formatTierFallbackDetail(record.openCsTier);
+}
+
+function formatTierFallbackDetail(tier: OpenCsTier | undefined): string {
+  return tier ? `OpenCS tier fallback: ${tier}` : "N/A";
 }

@@ -26,29 +26,29 @@ export const translations = {
       configCaption: "Scoring rules are loaded from",
     },
     browser: {
-      ariaUniversityFilters: "University filters",
+      ariaUniversityFilters: "Program filters",
       kicker: "Explore",
       compareHeading: "Build a comparison",
-      singleHeading: "Browse one university",
+      singleHeading: "Browse one program",
       compareCopy:
-        "Choose two universities to compare side by side with an overlapped radar chart.",
+        "Choose two programs to compare side by side with an overlapped radar chart.",
       singleCopy:
-        "Focus on one university at a time and inspect its details in a single card view.",
+        "Focus on one program at a time and inspect its details in a single card view.",
       ariaViewMode: "View mode",
       singleMode: "Single mode",
       compareMode: "Compare mode",
-      universityA: "University A",
-      universityB: "University B",
-      university: "University",
+      universityA: "Program A",
+      universityB: "Program B",
+      university: "Program",
       selected: "Selected",
       recordsWarning: "record(s) have validation warnings.",
       recordsWarningCopy: "They still render, but the UI flags the affected programs.",
-      noMatchingUniversity: "No matching university",
+      noMatchingUniversity: "No matching program",
       noMatchingUniversityCopy:
-        "Choose a university from the sidebar to render the single-school view.",
-      pickTwoUniversities: "Pick two universities",
+        "Choose a program from the sidebar to render the single-program view.",
+      pickTwoUniversities: "Pick two programs",
       pickTwoUniversitiesCopy:
-        "Choose two different schools from the sidebar to render the comparison.",
+        "Choose two different programs from the sidebar to render the comparison.",
       compareView: "Compare view",
       comparisonLegend: "Comparison legend",
       activeAxis: "Active axis",
@@ -122,25 +122,25 @@ export const translations = {
       configCaption: "评分规则加载自",
     },
     browser: {
-      ariaUniversityFilters: "学校筛选",
+      ariaUniversityFilters: "项目筛选",
       kicker: "探索",
       compareHeading: "对比项目",
-      singleHeading: "查看单个学校",
-      compareCopy: "选择两所学校并排对比，使用重叠雷达图查看差异。",
-      singleCopy: "一次聚焦一所学校，在单卡片视图中查看详细信息。",
+      singleHeading: "查看单个项目",
+      compareCopy: "选择两个项目并排对比，使用重叠雷达图查看差异。",
+      singleCopy: "一次聚焦一个项目，在单卡片视图中查看详细信息。",
       ariaViewMode: "查看模式",
       singleMode: "单校模式",
       compareMode: "对比模式",
-      universityA: "学校 A",
-      universityB: "学校 B",
-      university: "学校",
+      universityA: "项目 A",
+      universityB: "项目 B",
+      university: "项目",
       selected: "已选",
       recordsWarning: "条记录存在校验警告。",
       recordsWarningCopy: "它们仍会显示，但界面会标出受影响的项目。",
-      noMatchingUniversity: "没有匹配的学校",
-      noMatchingUniversityCopy: "请从侧边栏选择学校以显示单校视图。",
-      pickTwoUniversities: "请选择两所学校",
-      pickTwoUniversitiesCopy: "请从侧边栏选择两所不同学校以显示对比视图。",
+      noMatchingUniversity: "没有匹配的项目",
+      noMatchingUniversityCopy: "请从侧边栏选择项目以显示单项目视图。",
+      pickTwoUniversities: "请选择两个项目",
+      pickTwoUniversitiesCopy: "请从侧边栏选择两个不同项目以显示对比视图。",
       compareView: "对比视图",
       comparisonLegend: "对比图例",
       activeAxis: "当前维度",
@@ -244,19 +244,25 @@ export function getAxisDetail(language: Language, program: ProgramView, axisKey:
 
 export function formatLocation(language: Language, program: ProgramView): string {
   const browser = translations[language].browser;
-  const city = program.locationCity ?? browser.notAvailable;
-  const state = program.locationState ? `, ${program.locationState}` : "";
+  const city = program.locationCity ?? "";
+  const state = program.locationState ? `${city ? ", " : ""}${program.locationState}` : "";
   const type = program.locationType
     ? ` (${program.locationType === "city" ? browser.city : browser.suburb})`
     : "";
-  return `${city}${state}${type}`;
+  const value = `${city}${state}${type}`.trim();
+  return value || browser.notAvailable;
 }
 
 export function formatDuration(language: Language, program: ProgramView): string {
   const browser = translations[language].browser;
-  const duration = program.duration ?? browser.notAvailable;
-  const credits = formatNumber(language, program.creditHours);
-  return `${duration} / ${credits}`;
+  const parts = [
+    program.duration,
+    typeof program.creditHours === "number" && Number.isFinite(program.creditHours)
+      ? formatNumber(language, program.creditHours)
+      : null,
+  ].filter((value): value is string => Boolean(value));
+
+  return parts.length > 0 ? parts.join(" / ") : browser.notAvailable;
 }
 
 export function formatCurrency(language: Language, value: number | undefined): string {

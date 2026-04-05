@@ -1,0 +1,13 @@
+{
+  "id": "ucsd-cs75",
+  "schoolName": "University of California, San Diego",
+  "programName": "Master of Science in Computer Science (CS75)",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/CS75%40UCSD/"
+  },
+  "notes": [
+    "OpenCS tier: A",
+    "Seeded from the OpenCS grade list."
+  ]
+}

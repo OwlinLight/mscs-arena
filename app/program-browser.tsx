@@ -31,28 +31,23 @@ type ProgramBrowserProps = {
 export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
   const t = translations[language].browser;
   const [mode, setMode] = useState<"single" | "compare">("compare");
-  const [selectedSchool, setSelectedSchool] = useState<string>(programs[0]?.schoolName ?? "");
-  const [selectedSchools, setSelectedSchools] = useState<[string, string]>(() => [
-    programs[0]?.schoolName ?? "",
-    programs[1]?.schoolName ?? programs[0]?.schoolName ?? "",
+  const [selectedProgramId, setSelectedProgramId] = useState<string>(programs[0]?.id ?? "");
+  const [selectedProgramIds, setSelectedProgramIds] = useState<[string, string]>(() => [
+    programs[0]?.id ?? "",
+    programs[1]?.id ?? programs[0]?.id ?? "",
   ]);
-
-  const schools = useMemo(
-    () => Array.from(new Set(programs.map((program) => program.schoolName))),
-    [programs],
-  );
 
   const comparedPrograms = useMemo(
     () =>
-      selectedSchools
-        .map((school) => programs.find((program) => program.schoolName === school))
+      selectedProgramIds
+        .map((programId) => programs.find((program) => program.id === programId))
         .filter((program): program is ProgramView => Boolean(program)),
-    [programs, selectedSchools],
+    [programs, selectedProgramIds],
   );
 
   const singleProgram = useMemo(
-    () => programs.find((program) => program.schoolName === selectedSchool) ?? null,
-    [programs, selectedSchool],
+    () => programs.find((program) => program.id === selectedProgramId) ?? null,
+    [programs, selectedProgramId],
   );
 
   const invalidPrograms =
@@ -95,19 +90,19 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
                 <label className="compare-control">
                   <span>{t.universityA}</span>
                   <select
-                    value={selectedSchools[0]}
+                    value={selectedProgramIds[0]}
                     onChange={(event) =>
-                      setSelectedSchools(([_, second]) => [
+                      setSelectedProgramIds(([_, second]) => [
                         event.target.value,
                         second === event.target.value
-                          ? schools.find((school) => school !== event.target.value) ?? second
+                          ? programs.find((program) => program.id !== event.target.value)?.id ?? second
                           : second,
                       ])
                     }
                   >
-                    {schools.map((school) => (
-                      <option key={school} value={school}>
-                        {school}
+                    {programs.map((program) => (
+                      <option key={program.id} value={program.id}>
+                        {getProgramOptionLabel(program)}
                       </option>
                     ))}
                   </select>
@@ -116,23 +111,23 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
                 <label className="compare-control">
                   <span>{t.universityB}</span>
                   <select
-                    value={selectedSchools[1]}
+                    value={selectedProgramIds[1]}
                     onChange={(event) =>
-                      setSelectedSchools(([first]) => [
+                      setSelectedProgramIds(([first]) => [
                         first === event.target.value
-                          ? schools.find((school) => school !== event.target.value) ?? first
+                          ? programs.find((program) => program.id !== event.target.value)?.id ?? first
                           : first,
                         event.target.value,
                       ])
                     }
                   >
-                    {schools.map((school) => (
+                    {programs.map((program) => (
                       <option
-                        key={school}
-                        value={school}
-                        disabled={school === selectedSchools[0]}
+                        key={program.id}
+                        value={program.id}
+                        disabled={program.id === selectedProgramIds[0]}
                       >
-                        {school}
+                        {getProgramOptionLabel(program)}
                       </option>
                     ))}
                   </select>
@@ -140,13 +135,13 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
               </div>
 
               <div className="filter-list" role="list">
-                {selectedSchools.map((school, index) => {
-                  const program = programs.find((candidate) => candidate.schoolName === school);
+                {selectedProgramIds.map((programId, index) => {
+                  const program = programs.find((candidate) => candidate.id === programId);
 
                   return (
-                    <div key={`${school}-${index}`} className="filter-chip active static">
+                    <div key={`${programId}-${index}`} className="filter-chip active static">
                       <span className="filter-chip-label">
-                        {index === 0 ? "A" : "B"}: {school}
+                        {index === 0 ? "A" : "B"}: {program ? getProgramOptionLabel(program) : t.notAvailable}
                       </span>
                       <RankingChip language={language} program={program ?? null} />
                     </div>
@@ -159,10 +154,10 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
               <div className="compare-control-group">
                 <label className="compare-control">
                   <span>{t.university}</span>
-                  <select value={selectedSchool} onChange={(event) => setSelectedSchool(event.target.value)}>
-                    {schools.map((school) => (
-                      <option key={school} value={school}>
-                        {school}
+                  <select value={selectedProgramId} onChange={(event) => setSelectedProgramId(event.target.value)}>
+                    {programs.map((program) => (
+                      <option key={program.id} value={program.id}>
+                        {getProgramOptionLabel(program)}
                       </option>
                     ))}
                   </select>
@@ -171,7 +166,9 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
 
               <div className="filter-list" role="list">
                 <div className="filter-chip active static">
-                  <span className="filter-chip-label">{t.selected}: {selectedSchool}</span>
+                  <span className="filter-chip-label">
+                    {t.selected}: {singleProgram ? getProgramOptionLabel(singleProgram) : t.notAvailable}
+                  </span>
                   <RankingChip language={language} program={singleProgram} />
                 </div>
               </div>
@@ -210,8 +207,8 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
               language={language}
               leftProgram={comparedPrograms[0]}
               rightProgram={comparedPrograms[1]}
-              onSelectProgram={(schoolName) => {
-                setSelectedSchool(schoolName);
+              onSelectProgram={(programId) => {
+                setSelectedProgramId(programId);
                 setMode("single");
               }}
             />
@@ -237,7 +234,7 @@ function ComparisonPanel({
   language: Language;
   leftProgram: ProgramView;
   rightProgram: ProgramView;
-  onSelectProgram: (schoolName: string) => void;
+  onSelectProgram: (programId: string) => void;
 }) {
   const t = translations[language].browser;
   const [activeAxis, setActiveAxis] = useState<RadarAxisKey>(RADAR_AXES[0].key);
@@ -255,18 +252,18 @@ function ComparisonPanel({
           <button
             type="button"
             className="comparison-legend-item left"
-            onClick={() => onSelectProgram(leftProgram.schoolName)}
+            onClick={() => onSelectProgram(leftProgram.id)}
           >
             <i />
-            {leftProgram.schoolName}
+            {getProgramOptionLabel(leftProgram)}
           </button>
           <button
             type="button"
             className="comparison-legend-item right"
-            onClick={() => onSelectProgram(rightProgram.schoolName)}
+            onClick={() => onSelectProgram(rightProgram.id)}
           >
             <i />
-            {rightProgram.schoolName}
+            {getProgramOptionLabel(rightProgram)}
           </button>
         </div>
       </div>
@@ -351,12 +348,14 @@ function ProgramCard({ language, program }: { language: Language; program: Progr
         <dl className="info-list">
           <InfoRow label={t.location} value={formatLocation(language, program)} />
           <InfoRow label={t.durationCredits} value={formatDuration(language, program)} />
-          <InfoRow label={t.thesis} value={program.thesisOption ?? t.notAvailable} />
-          <InfoRow
-            label={t.researchVsIndustry}
-            value={`${getLocalizedResearchIndustryLabel(language, program.researchIndustryLabel)} - ${t.researchVsIndustryDetail}`}
-          />
-          <InfoRow label={t.deliveryMode} value={program.deliveryMode ?? t.notAvailable} />
+          {program.thesisOption ? <InfoRow label={t.thesis} value={program.thesisOption} /> : null}
+          {program.researchIndustryLabel !== "N/A" ? (
+            <InfoRow
+              label={t.researchVsIndustry}
+              value={`${getLocalizedResearchIndustryLabel(language, program.researchIndustryLabel)} - ${t.researchVsIndustryDetail}`}
+            />
+          ) : null}
+          {program.deliveryMode ? <InfoRow label={t.deliveryMode} value={program.deliveryMode} /> : null}
         </dl>
       </section>
 
@@ -408,40 +407,9 @@ function ProgramCard({ language, program }: { language: Language; program: Progr
       <section className="section-block">
         <h3>{t.fieldsIncluding}</h3>
         <dl className="info-list">
-          <InfoRow
-            label={t.tuition}
-            value={
-              Number.isFinite(program.tuitionTotalUsd)
-                ? `${formatDisplayCurrency(language, program.tuitionTotalUsd)} ${t.total}`
-                : Number.isFinite(program.tuitionPerCreditUsd)
-                  ? `${formatDisplayCurrency(language, program.tuitionPerCreditUsd)} ${t.perCredit}`
-                  : t.notAvailable
-            }
-          />
-          <InfoRow label={t.duration} value={program.duration ?? t.notAvailable} />
-          <InfoRow label={t.credits} value={formatDisplayNumber(language, program.creditHours)} />
-          <InfoRow label={t.location} value={formatLocation(language, program)} />
-          <InfoRow label={t.employerDensity} value={formatEmployerDensity(language, program.employerDensity)} />
-          <InfoRow label={t.livingCost} value={formatLivingCost(language, program.livingCostUsd)} />
-          <InfoRow label={t.thesisOption} value={program.thesisOption ?? t.notAvailable} />
-          <InfoRow
-            label={t.researchVsIndustryOrientation}
-            value={getLocalizedResearchIndustryLabel(language, program.researchIndustryLabel)}
-          />
-          <InfoRow label={t.deliveryMode} value={program.deliveryMode ?? t.notAvailable} />
-          <InfoRow
-            label={t.rankingInputs}
-            value={[
-              `${t.rankingUsNews} ${program.rankings?.usNewsUndergrad ?? t.notAvailable}`,
-              `${t.rankingCsrankings} ${program.rankings?.csrankings ?? t.notAvailable}`,
-              `${t.rankingOpenCs} ${program.rankings?.openCs ?? t.notAvailable}`,
-              `${t.rankingCsOpen} ${program.rankings?.csOpenRankings ?? t.notAvailable}`,
-            ].join(" / ")}
-          />
-          <InfoRow
-            label={t.notes}
-            value={program.notes?.length ? program.notes.join(" | ") : t.notAvailable}
-          />
+          {buildFieldRows(language, program).map((row) => (
+            <InfoRow key={row.label} label={row.label} value={row.value} />
+          ))}
         </dl>
       </section>
 
@@ -485,13 +453,38 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function getProgramOptionLabel(program: ProgramView): string {
+  return `${program.schoolName} - ${program.programName}`;
+}
+
 function RankingChip({ language, program }: { language: Language; program: ProgramView | null }) {
   const t = translations[language].browser;
   const rank = program?.rankings?.csOpenRankings;
   const url = program?.references?.csOpenRankingsUrl;
+  const tier = program?.openCsTier;
+  const openCsUrl = program?.references?.openCsUrl;
 
   if (!Number.isFinite(rank)) {
-    return <span>{t.notAvailable}</span>;
+    if (!tier) {
+      return <span className="filter-chip-rank">{t.notAvailable}</span>;
+    }
+
+    if (!openCsUrl) {
+      return <span className="filter-chip-rank">{tier}</span>;
+    }
+
+    return (
+      <a
+        className="filter-chip-rank"
+        href={openCsUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`${program.schoolName} OpenCS ${tier}`}
+        title={`OpenCS ${tier}`}
+      >
+        {tier}
+      </a>
+    );
   }
 
   if (!url) {
@@ -510,6 +503,62 @@ function RankingChip({ language, program }: { language: Language; program: Progr
       {`#${rank}`}
     </a>
   );
+}
+
+type FieldRow = {
+  label: string;
+  value: string;
+};
+
+function buildFieldRows(language: Language, program: ProgramView) {
+  const t = translations[language].browser;
+  const rankingValues = [
+    typeof program.rankings?.usNewsUndergrad === "number"
+      ? `${t.rankingUsNews} ${program.rankings.usNewsUndergrad}`
+      : null,
+    typeof program.rankings?.csrankings === "number"
+      ? `${t.rankingCsrankings} ${program.rankings.csrankings}`
+      : null,
+    typeof program.rankings?.openCs === "number"
+      ? `${t.rankingOpenCs} ${program.rankings.openCs}`
+      : null,
+    typeof program.rankings?.csOpenRankings === "number"
+      ? `${t.rankingCsOpen} ${program.rankings.csOpenRankings}`
+      : null,
+    program.openCsTier ? `OpenCS Tier ${program.openCsTier}` : null,
+  ].filter((value): value is string => Boolean(value));
+  const rows: Array<FieldRow | null> = [
+    Number.isFinite(program.tuitionTotalUsd)
+      ? { label: t.tuition, value: `${formatDisplayCurrency(language, program.tuitionTotalUsd)} ${t.total}` }
+      : Number.isFinite(program.tuitionPerCreditUsd)
+        ? { label: t.tuition, value: `${formatDisplayCurrency(language, program.tuitionPerCreditUsd)} ${t.perCredit}` }
+        : null,
+    program.duration ? { label: t.duration, value: program.duration } : null,
+    Number.isFinite(program.creditHours)
+      ? { label: t.credits, value: formatDisplayNumber(language, program.creditHours) }
+      : null,
+    program.locationCity || program.locationState
+      ? { label: t.location, value: formatLocation(language, program) }
+      : null,
+    Number.isFinite(program.employerDensity)
+      ? { label: t.employerDensity, value: formatEmployerDensity(language, program.employerDensity) }
+      : null,
+    Number.isFinite(program.livingCostUsd)
+      ? { label: t.livingCost, value: formatLivingCost(language, program.livingCostUsd) }
+      : null,
+    program.thesisOption ? { label: t.thesisOption, value: program.thesisOption } : null,
+    program.researchIndustryLabel !== "N/A"
+      ? {
+          label: t.researchVsIndustryOrientation,
+          value: getLocalizedResearchIndustryLabel(language, program.researchIndustryLabel),
+        }
+      : null,
+    program.deliveryMode ? { label: t.deliveryMode, value: program.deliveryMode } : null,
+    rankingValues.length > 0 ? { label: t.rankingInputs, value: rankingValues.join(" / ") } : null,
+    program.notes?.length ? { label: t.notes, value: program.notes.join(" | ") } : null,
+  ];
+
+  return rows.filter((row): row is FieldRow => row !== null);
 }
 
 function ReferenceChip({

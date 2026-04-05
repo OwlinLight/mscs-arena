@@ -1,0 +1,13 @@
+{
+  "id": "rice-mcs",
+  "schoolName": "Rice University",
+  "programName": "Master of Computer Science",
+  "degreeType": "MCS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MCS%40Rice/"
+  },
+  "notes": [
+    "OpenCS tier: A-",
+    "Seeded from the OpenCS grade list."
+  ]
+}

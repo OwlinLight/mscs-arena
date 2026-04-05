@@ -1,0 +1,13 @@
+{
+  "id": "berkeley-eecs-meng",
+  "schoolName": "University of California, Berkeley",
+  "programName": "Master of Engineering in Electrical Engineering and Computer Sciences",
+  "degreeType": "MEng",
+  "references": {
+    "openCsUrl": "https://opencs.app/EECS%20Meng%40Berkeley/"
+  },
+  "notes": [
+    "OpenCS tier: A+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

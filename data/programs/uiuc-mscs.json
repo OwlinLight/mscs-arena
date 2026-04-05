@@ -1,0 +1,13 @@
+{
+  "id": "uiuc-mscs",
+  "schoolName": "University of Illinois Urbana-Champaign",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40UIUC/"
+  },
+  "notes": [
+    "OpenCS tier: S",
+    "Seeded from the OpenCS grade list."
+  ]
+}
