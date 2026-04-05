@@ -5,18 +5,18 @@ import stanfordProgramJson from "@/data/programs/stanford-mscs.json";
 import uwProgramJson from "@/data/programs/uw-mscs.json";
 
 export const RADAR_AXES = [
-  { key: "prestigeScore", label: "Prestigious" },
-  { key: "majorScore", label: "Major ranking" },
-  { key: "difficultyScore", label: "How hard it is" },
-  { key: "locationScore", label: "Location" },
-  { key: "cohortScore", label: "Cohort size" },
-  { key: "tuitionScore", label: "Tuition costs" },
+  { key: "prestigeScore" },
+  { key: "majorScore" },
+  { key: "difficultyScore" },
+  { key: "locationScore" },
+  { key: "cohortScore" },
+  { key: "tuitionScore" },
 ] as const;
 
 export const GRADE_ORDER = ["A", "B", "C", "D", "E"] as const;
 
 type Grade = (typeof GRADE_ORDER)[number];
-type RadarAxisKey = (typeof RADAR_AXES)[number]["key"];
+export type RadarAxisKey = (typeof RADAR_AXES)[number]["key"];
 type LocationType = "city" | "suburb";
 
 type Band = {

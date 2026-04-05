@@ -3,18 +3,31 @@
 import { useMemo, useState } from "react";
 
 import {
-  formatCurrency,
-  formatNumber,
+  formatCurrency as formatDisplayCurrency,
+  formatDuration,
+  formatLocation,
+  formatNumber as formatDisplayNumber,
+  getAxisDetail,
+  getAxisKeys,
+  getAxisLabel,
+  getResearchIndustryLabel as getLocalizedResearchIndustryLabel,
+  translations,
+  type Language,
+} from "@/src/lib/i18n";
+import {
   gradeToValue,
   RADAR_AXES,
   type ProgramView,
+  type RadarAxisKey,
 } from "@/src/lib/programs";
 
 type ProgramBrowserProps = {
+  language: Language;
   programs: ProgramView[];
 };
 
-export function ProgramBrowser({ programs }: ProgramBrowserProps) {
+export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
+  const t = translations[language].browser;
   const [mode, setMode] = useState<"single" | "compare">("compare");
   const [selectedSchool, setSelectedSchool] = useState<string>(programs[0]?.schoolName ?? "");
   const [selectedSchools, setSelectedSchools] = useState<[string, string]>(() => [
@@ -49,30 +62,28 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
 
   return (
     <div className="content-layout">
-      <aside className="filter-sidebar" aria-label="University filters">
+      <aside className="filter-sidebar" aria-label={t.ariaUniversityFilters}>
         <div className="filter-panel">
-          <p className="filter-kicker">Explore</p>
-          <h2>{mode === "compare" ? "Build a comparison" : "Browse one university"}</h2>
+          <p className="filter-kicker">{t.kicker}</p>
+          <h2>{mode === "compare" ? t.compareHeading : t.singleHeading}</h2>
           <p className="filter-copy">
-            {mode === "compare"
-              ? "Choose two universities to compare side by side with an overlapped radar chart."
-              : "Focus on one university at a time and inspect its details in a single card view."}
+            {mode === "compare" ? t.compareCopy : t.singleCopy}
           </p>
 
-          <div className="mode-toggle" role="tablist" aria-label="View mode">
+          <div className="mode-toggle" role="tablist" aria-label={t.ariaViewMode}>
             <button
               type="button"
               className={mode === "single" ? "mode-toggle-button active" : "mode-toggle-button"}
               onClick={() => setMode("single")}
             >
-              Single mode
+              {t.singleMode}
             </button>
             <button
               type="button"
               className={mode === "compare" ? "mode-toggle-button active" : "mode-toggle-button"}
               onClick={() => setMode("compare")}
             >
-              Compare mode
+              {t.compareMode}
             </button>
           </div>
 
@@ -80,7 +91,7 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
             <>
               <div className="compare-control-group">
                 <label className="compare-control">
-                  <span>University A</span>
+                  <span>{t.universityA}</span>
                   <select
                     value={selectedSchools[0]}
                     onChange={(event) =>
@@ -101,7 +112,7 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
                 </label>
 
                 <label className="compare-control">
-                  <span>University B</span>
+                  <span>{t.universityB}</span>
                   <select
                     value={selectedSchools[1]}
                     onChange={(event) =>
@@ -141,7 +152,7 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
             <>
               <div className="compare-control-group">
                 <label className="compare-control">
-                  <span>University</span>
+                  <span>{t.university}</span>
                   <select value={selectedSchool} onChange={(event) => setSelectedSchool(event.target.value)}>
                     {schools.map((school) => (
                       <option key={school} value={school}>
@@ -154,7 +165,7 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
 
               <div className="filter-list" role="list">
                 <div className="filter-chip active static">
-                  <span className="filter-chip-label">Selected: {selectedSchool}</span>
+                  <span className="filter-chip-label">{t.selected}: {selectedSchool}</span>
                   <span>1</span>
                 </div>
               </div>
@@ -166,38 +177,39 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
       <div className="content-main">
         {invalidPrograms.length > 0 ? (
           <section className="validation-banner">
-            <strong>{invalidPrograms.length} record(s) have validation warnings.</strong>
-            <span>They still render, but the UI flags the affected programs.</span>
+            <strong>{invalidPrograms.length} {t.recordsWarning}</strong>
+            <span>{t.recordsWarningCopy}</span>
           </section>
         ) : null}
 
         {mode === "single" ? (
           singleProgram ? (
             <section className="program-grid single-grid">
-              <ProgramCard key={singleProgram.id} program={singleProgram} />
+              <ProgramCard key={singleProgram.id} language={language} program={singleProgram} />
             </section>
           ) : (
             <section className="empty-state">
-              <h2>No matching university</h2>
-              <p>Choose a university from the sidebar to render the single-school view.</p>
+              <h2>{t.noMatchingUniversity}</h2>
+              <p>{t.noMatchingUniversityCopy}</p>
             </section>
           )
         ) : comparedPrograms.length < 2 ? (
           <section className="empty-state">
-            <h2>Pick two universities</h2>
-            <p>Choose two different schools from the sidebar to render the comparison.</p>
+            <h2>{t.pickTwoUniversities}</h2>
+            <p>{t.pickTwoUniversitiesCopy}</p>
           </section>
         ) : (
           <>
             <ComparisonPanel
+              language={language}
               leftProgram={comparedPrograms[0]}
               rightProgram={comparedPrograms[1]}
             />
 
             <section className="program-grid comparison-grid">
               {comparedPrograms.map((program) => (
-              <ProgramCard key={program.id} program={program} />
-            ))}
+                <ProgramCard key={program.id} language={language} program={program} />
+              ))}
             </section>
           </>
         )}
@@ -207,27 +219,27 @@ export function ProgramBrowser({ programs }: ProgramBrowserProps) {
 }
 
 function ComparisonPanel({
+  language,
   leftProgram,
   rightProgram,
 }: {
+  language: Language;
   leftProgram: ProgramView;
   rightProgram: ProgramView;
 }) {
-  const [activeAxis, setActiveAxis] = useState<(typeof RADAR_AXES)[number]["key"]>(
-    RADAR_AXES[0].key,
-  );
-  const activeAxisMeta = RADAR_AXES.find((axis) => axis.key === activeAxis) ?? RADAR_AXES[0];
+  const t = translations[language].browser;
+  const [activeAxis, setActiveAxis] = useState<RadarAxisKey>(RADAR_AXES[0].key);
 
   return (
     <section className="comparison-panel">
       <div className="comparison-panel-header">
         <div>
-          <p className="filter-kicker">Compare view</p>
+          <p className="filter-kicker">{t.compareView}</p>
           <h2>
             {leftProgram.schoolName} vs {rightProgram.schoolName}
           </h2>
         </div>
-        <div className="comparison-legend" aria-label="Comparison legend">
+        <div className="comparison-legend" aria-label={t.comparisonLegend}>
           <span className="comparison-legend-item left">
             <i />
             {leftProgram.schoolName}
@@ -241,6 +253,7 @@ function ComparisonPanel({
 
       <div className="comparison-stage">
         <ComparisonRadarChart
+          language={language}
           leftProgram={leftProgram}
           rightProgram={rightProgram}
           activeAxis={activeAxis}
@@ -249,37 +262,37 @@ function ComparisonPanel({
 
         <div className="comparison-inspector">
           <div className="radar-detail-card comparison-detail-card">
-            <p className="radar-detail-kicker">Active axis</p>
-            <h4>{activeAxisMeta.label}</h4>
+            <p className="radar-detail-kicker">{t.activeAxis}</p>
+            <h4>{getAxisLabel(language, activeAxis)}</h4>
             <div className="comparison-metric-grid">
               <div className="comparison-metric left">
                 <strong>{leftProgram.schoolName}</strong>
-                <p>{leftProgram.radarDetails[activeAxisMeta.key]}</p>
-                <span>Grade {leftProgram.radarScores[activeAxisMeta.key] ?? "N/A"}</span>
+                <p>{getAxisDetail(language, leftProgram, activeAxis)}</p>
+                <span>{t.grade} {leftProgram.radarScores[activeAxis] ?? t.notAvailable}</span>
               </div>
               <div className="comparison-metric right">
                 <strong>{rightProgram.schoolName}</strong>
-                <p>{rightProgram.radarDetails[activeAxisMeta.key]}</p>
-                <span>Grade {rightProgram.radarScores[activeAxisMeta.key] ?? "N/A"}</span>
+                <p>{getAxisDetail(language, rightProgram, activeAxis)}</p>
+                <span>{t.grade} {rightProgram.radarScores[activeAxis] ?? t.notAvailable}</span>
               </div>
             </div>
           </div>
 
           <ul className="score-list comparison-score-list">
-            {RADAR_AXES.map((axis) => (
-              <li key={axis.key} className="score-item">
+            {getAxisKeys().map((axisKey) => (
+              <li key={axisKey} className="score-item">
                 <button
                   type="button"
-                  className={activeAxis === axis.key ? "score-axis-button active" : "score-axis-button"}
-                  onMouseEnter={() => setActiveAxis(axis.key)}
-                  onFocus={() => setActiveAxis(axis.key)}
-                  onClick={() => setActiveAxis(axis.key)}
+                  className={activeAxis === axisKey ? "score-axis-button active" : "score-axis-button"}
+                  onMouseEnter={() => setActiveAxis(axisKey)}
+                  onFocus={() => setActiveAxis(axisKey)}
+                  onClick={() => setActiveAxis(axisKey)}
                 >
-                  {axis.label}
+                  {getAxisLabel(language, axisKey)}
                 </button>
                 <div className="comparison-score-pair">
-                  <strong className="left">{leftProgram.radarScores[axis.key] ?? "N/A"}</strong>
-                  <strong className="right">{rightProgram.radarScores[axis.key] ?? "N/A"}</strong>
+                  <strong className="left">{leftProgram.radarScores[axisKey] ?? t.notAvailable}</strong>
+                  <strong className="right">{rightProgram.radarScores[axisKey] ?? t.notAvailable}</strong>
                 </div>
               </li>
             ))}
@@ -290,12 +303,9 @@ function ComparisonPanel({
   );
 }
 
-function ProgramCard({ program }: { program: ProgramView }) {
-  const [activeAxis, setActiveAxis] = useState<(typeof RADAR_AXES)[number]["key"]>(
-    RADAR_AXES[0].key,
-  );
-
-  const activeAxisMeta = RADAR_AXES.find((axis) => axis.key === activeAxis) ?? RADAR_AXES[0];
+function ProgramCard({ language, program }: { language: Language; program: ProgramView }) {
+  const t = translations[language].browser;
+  const [activeAxis, setActiveAxis] = useState<RadarAxisKey>(RADAR_AXES[0].key);
 
   return (
     <article className="program-card">
@@ -306,49 +316,54 @@ function ProgramCard({ program }: { program: ProgramView }) {
           <p className="program-degree">{program.degreeType}</p>
         </div>
         {program.validation.valid ? null : (
-          <span className="warning-badge">Validation warnings</span>
+          <span className="warning-badge">{t.validationWarnings}</span>
         )}
       </header>
 
       <section className="section-block">
-        <h3>Basic program info</h3>
+        <h3>{t.basicProgramInfo}</h3>
         <dl className="info-list">
-          <InfoRow label="Location" value={formatLocation(program)} />
-          <InfoRow label="Duration / Credits" value={formatDuration(program)} />
-          <InfoRow label="Thesis" value={program.thesisOption ?? "N/A"} />
+          <InfoRow label={t.location} value={formatLocation(language, program)} />
+          <InfoRow label={t.durationCredits} value={formatDuration(language, program)} />
+          <InfoRow label={t.thesis} value={program.thesisOption ?? t.notAvailable} />
           <InfoRow
-            label="Research vs Industry"
-            value={`${program.researchIndustryLabel} - course design & thesis requirement`}
+            label={t.researchVsIndustry}
+            value={`${getLocalizedResearchIndustryLabel(language, program.researchIndustryLabel)} - ${t.researchVsIndustryDetail}`}
           />
-          <InfoRow label="Delivery mode" value={program.deliveryMode ?? "N/A"} />
+          <InfoRow label={t.deliveryMode} value={program.deliveryMode ?? t.notAvailable} />
         </dl>
       </section>
 
       <section className="section-block">
-        <h3>Radar chart including (map to ABCDE)</h3>
+        <h3>{t.radarSection}</h3>
         <div className="chart-wrap single-program-chart">
-          <RadarChart program={program} activeAxis={activeAxis} onAxisHover={setActiveAxis} />
+          <RadarChart
+            language={language}
+            program={program}
+            activeAxis={activeAxis}
+            onAxisHover={setActiveAxis}
+          />
           <div className="radar-side-panel">
             <div className="radar-detail-card">
-              <p className="radar-detail-kicker">Axis detail</p>
-              <h4>{activeAxisMeta.label}</h4>
-              <p>{program.radarDetails[activeAxisMeta.key]}</p>
-              <strong>Grade {program.radarScores[activeAxisMeta.key] ?? "N/A"}</strong>
+              <p className="radar-detail-kicker">{t.axisDetail}</p>
+              <h4>{getAxisLabel(language, activeAxis)}</h4>
+              <p>{getAxisDetail(language, program, activeAxis)}</p>
+              <strong>{t.grade} {program.radarScores[activeAxis] ?? t.notAvailable}</strong>
             </div>
 
             <ul className="score-list">
-              {RADAR_AXES.map((axis) => (
-                <li key={axis.key} className="score-item">
+              {getAxisKeys().map((axisKey) => (
+                <li key={axisKey} className="score-item">
                   <button
                     type="button"
-                    className={activeAxis === axis.key ? "score-axis-button active" : "score-axis-button"}
-                    onMouseEnter={() => setActiveAxis(axis.key)}
-                    onFocus={() => setActiveAxis(axis.key)}
-                    onClick={() => setActiveAxis(axis.key)}
+                    className={activeAxis === axisKey ? "score-axis-button active" : "score-axis-button"}
+                    onMouseEnter={() => setActiveAxis(axisKey)}
+                    onFocus={() => setActiveAxis(axisKey)}
+                    onClick={() => setActiveAxis(axisKey)}
                   >
-                    {axis.label}
+                    {getAxisLabel(language, axisKey)}
                   </button>
-                  <strong>{program.radarScores[axis.key] ?? "N/A"}</strong>
+                  <strong>{program.radarScores[axisKey] ?? t.notAvailable}</strong>
                 </li>
               ))}
             </ul>
@@ -357,54 +372,54 @@ function ProgramCard({ program }: { program: ProgramView }) {
       </section>
 
       <section className="section-block">
-        <h3>Reference</h3>
+        <h3>{t.reference}</h3>
         <div className="reference-list">
-          <ReferenceChip label="OpenCS Page" url={program.references?.openCsUrl} />
-          <ReferenceChip label="Niche Page" url={program.references?.nicheUrl} />
+          <ReferenceChip language={language} label={t.openCsPage} url={program.references?.openCsUrl} />
+          <ReferenceChip language={language} label={t.nichePage} url={program.references?.nicheUrl} />
         </div>
       </section>
 
       <section className="section-block">
-        <h3>Fields including</h3>
+        <h3>{t.fieldsIncluding}</h3>
         <dl className="info-list">
           <InfoRow
-            label="Tuition"
+            label={t.tuition}
             value={
               Number.isFinite(program.tuitionTotalUsd)
-                ? `${formatCurrency(program.tuitionTotalUsd)} total`
+                ? `${formatDisplayCurrency(language, program.tuitionTotalUsd)} ${t.total}`
                 : Number.isFinite(program.tuitionPerCreditUsd)
-                  ? `${formatCurrency(program.tuitionPerCreditUsd)} per credit`
-                  : "N/A"
+                  ? `${formatDisplayCurrency(language, program.tuitionPerCreditUsd)} ${t.perCredit}`
+                  : t.notAvailable
             }
           />
-          <InfoRow label="Duration" value={program.duration ?? "N/A"} />
-          <InfoRow label="Credits" value={formatNumber(program.creditHours)} />
-          <InfoRow label="Location" value={formatLocation(program)} />
-          <InfoRow label="Cohort size" value={formatNumber(program.cohortSize)} />
-          <InfoRow label="Thesis option" value={program.thesisOption ?? "N/A"} />
+          <InfoRow label={t.duration} value={program.duration ?? t.notAvailable} />
+          <InfoRow label={t.credits} value={formatDisplayNumber(language, program.creditHours)} />
+          <InfoRow label={t.location} value={formatLocation(language, program)} />
+          <InfoRow label={t.cohortSize} value={formatDisplayNumber(language, program.cohortSize)} />
+          <InfoRow label={t.thesisOption} value={program.thesisOption ?? t.notAvailable} />
           <InfoRow
-            label="Research vs industry orientation"
-            value={program.researchIndustryLabel}
+            label={t.researchVsIndustryOrientation}
+            value={getLocalizedResearchIndustryLabel(language, program.researchIndustryLabel)}
           />
-          <InfoRow label="Delivery mode" value={program.deliveryMode ?? "N/A"} />
+          <InfoRow label={t.deliveryMode} value={program.deliveryMode ?? t.notAvailable} />
           <InfoRow
-            label="Ranking inputs"
+            label={t.rankingInputs}
             value={[
-              `US News ${program.rankings?.usNewsUndergrad ?? "N/A"}`,
-              `CSRankings ${program.rankings?.csrankings ?? "N/A"}`,
-              `OpenCS ${program.rankings?.openCs ?? "N/A"}`,
+              `${t.rankingUsNews} ${program.rankings?.usNewsUndergrad ?? t.notAvailable}`,
+              `${t.rankingCsrankings} ${program.rankings?.csrankings ?? t.notAvailable}`,
+              `${t.rankingOpenCs} ${program.rankings?.openCs ?? t.notAvailable}`,
             ].join(" / ")}
           />
           <InfoRow
-            label="Notes"
-            value={program.notes?.length ? program.notes.join(" | ") : "N/A"}
+            label={t.notes}
+            value={program.notes?.length ? program.notes.join(" | ") : t.notAvailable}
           />
         </dl>
       </section>
 
       {program.validation.valid ? null : (
         <section className="section-block warning-list">
-          <h3>Validation details</h3>
+          <h3>{t.validationDetails}</h3>
           <ul>
             {program.validation.errors.map((error) => (
               <li key={error}>{error}</li>
@@ -425,9 +440,17 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ReferenceChip({ label, url }: { label: string; url?: string }) {
+function ReferenceChip({
+  language,
+  label,
+  url,
+}: {
+  language: Language;
+  label: string;
+  url?: string;
+}) {
   if (!url) {
-    return <span className="reference disabled">{label}: N/A</span>;
+    return <span className="reference disabled">{label}: {translations[language].browser.notAvailable}</span>;
   }
 
   return (
@@ -438,13 +461,15 @@ function ReferenceChip({ label, url }: { label: string; url?: string }) {
 }
 
 function RadarChart({
+  language,
   program,
   activeAxis,
   onAxisHover,
 }: {
+  language: Language;
   program: ProgramView;
-  activeAxis: (typeof RADAR_AXES)[number]["key"];
-  onAxisHover: (axis: (typeof RADAR_AXES)[number]["key"]) => void;
+  activeAxis: RadarAxisKey;
+  onAxisHover: (axis: RadarAxisKey) => void;
 }) {
   const center = 110;
   const radius = 72;
@@ -467,7 +492,7 @@ function RadarChart({
     .join(" ");
 
   return (
-    <svg viewBox="0 0 220 220" className="radar-chart" aria-label="Program radar chart">
+    <svg viewBox="0 0 220 220" className="radar-chart" aria-label={translations[language].browser.programRadarChart}>
       {Array.from({ length: levels }, (_, index) => {
         const ringRadius = ((index + 1) * radius) / levels;
         const ringPoints = points
@@ -504,7 +529,7 @@ function RadarChart({
               onFocus={() => onAxisHover(point.axis.key)}
               onClick={() => onAxisHover(point.axis.key)}
             >
-              <span className="axis-label-text">{point.axis.label}</span>
+              <span className="axis-label-text">{getAxisLabel(language, point.axis.key)}</span>
             </button>
           </foreignObject>
         </g>
@@ -528,15 +553,17 @@ function RadarChart({
 }
 
 function ComparisonRadarChart({
+  language,
   leftProgram,
   rightProgram,
   activeAxis,
   onAxisHover,
 }: {
+  language: Language;
   leftProgram: ProgramView;
   rightProgram: ProgramView;
-  activeAxis: (typeof RADAR_AXES)[number]["key"];
-  onAxisHover: (axis: (typeof RADAR_AXES)[number]["key"]) => void;
+  activeAxis: RadarAxisKey;
+  onAxisHover: (axis: RadarAxisKey) => void;
 }) {
   const center = 130;
   const radius = 90;
@@ -574,7 +601,7 @@ function ComparisonRadarChart({
     <svg
       viewBox="0 0 260 260"
       className="comparison-radar-chart"
-      aria-label="Comparison radar chart"
+      aria-label={translations[language].browser.comparisonRadarChart}
     >
       {Array.from({ length: levels }, (_, index) => {
         const ringRadius = ((index + 1) * radius) / levels;
@@ -612,7 +639,9 @@ function ComparisonRadarChart({
               onFocus={() => onAxisHover(point.axis.key)}
               onClick={() => onAxisHover(point.axis.key)}
             >
-              <span className="axis-label-text comparison-axis-text">{point.axis.label}</span>
+              <span className="axis-label-text comparison-axis-text">
+                {getAxisLabel(language, point.axis.key)}
+              </span>
             </button>
           </foreignObject>
         </g>
@@ -638,17 +667,4 @@ function ComparisonRadarChart({
       })}
     </svg>
   );
-}
-
-function formatLocation(program: ProgramView): string {
-  const city = program.locationCity ?? "N/A";
-  const state = program.locationState ? `, ${program.locationState}` : "";
-  const type = program.locationType ? ` (${program.locationType})` : "";
-  return `${city}${state}${type}`;
-}
-
-function formatDuration(program: ProgramView): string {
-  const duration = program.duration ?? "N/A";
-  const credits = formatNumber(program.creditHours);
-  return `${duration} / ${credits}`;
 }
