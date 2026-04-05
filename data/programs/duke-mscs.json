@@ -1,0 +1,13 @@
+{
+  "id": "duke-mscs",
+  "schoolName": "Duke University",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40Duke/"
+  },
+  "notes": [
+    "OpenCS tier: A+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

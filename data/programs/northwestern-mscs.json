@@ -1,0 +1,13 @@
+{
+  "id": "northwestern-mscs",
+  "schoolName": "Northwestern University",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40NWU/"
+  },
+  "notes": [
+    "OpenCS tier: A+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

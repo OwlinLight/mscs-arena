@@ -1,0 +1,13 @@
+{
+  "id": "ucsb-mscs",
+  "schoolName": "University of California, Santa Barbara",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40UCSB/"
+  },
+  "notes": [
+    "OpenCS tier: A-",
+    "Seeded from the OpenCS grade list."
+  ]
+}

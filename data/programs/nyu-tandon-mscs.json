@@ -1,0 +1,13 @@
+{
+  "id": "nyu-tandon-mscs",
+  "schoolName": "New York University Tandon School of Engineering",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40NYU%20Tandon/"
+  },
+  "notes": [
+    "OpenCS tier: B+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

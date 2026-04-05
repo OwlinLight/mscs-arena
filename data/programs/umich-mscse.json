@@ -1,0 +1,13 @@
+{
+  "id": "umich-mscse",
+  "schoolName": "University of Michigan",
+  "programName": "Master of Science in Computer Science and Engineering",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCSE%40UMich/"
+  },
+  "notes": [
+    "OpenCS tier: S",
+    "Seeded from the OpenCS grade list."
+  ]
+}

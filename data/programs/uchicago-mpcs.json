@@ -1,0 +1,13 @@
+{
+  "id": "uchicago-mpcs",
+  "schoolName": "University of Chicago",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MPCS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MPCS%40UChicago/"
+  },
+  "notes": [
+    "OpenCS tier: A-",
+    "Seeded from the OpenCS grade list."
+  ]
+}

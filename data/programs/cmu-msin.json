@@ -1,0 +1,13 @@
+{
+  "id": "cmu-msin",
+  "schoolName": "Carnegie Mellon University",
+  "programName": "Master of Science in Information Networking",
+  "degreeType": "MSIN",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSIN%40CMU/"
+  },
+  "notes": [
+    "OpenCS tier: A+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

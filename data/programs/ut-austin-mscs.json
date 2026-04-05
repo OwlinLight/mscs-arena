@@ -1,0 +1,13 @@
+{
+  "id": "ut-austin-mscs",
+  "schoolName": "The University of Texas at Austin",
+  "programName": "Master of Science in Computer Science",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40UT-Austin/"
+  },
+  "notes": [
+    "OpenCS tier: SS",
+    "Seeded from the OpenCS grade list."
+  ]
+}

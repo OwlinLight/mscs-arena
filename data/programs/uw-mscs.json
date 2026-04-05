@@ -3,6 +3,8 @@
   "schoolName": "University of Washington",
   "programName": "Master of Science in Computer Science & Engineering",
   "degreeType": "MS",
+  "acceptanceRate": 30,
+  "employerDensity": 380,
   "locationCity": "Seattle",
   "locationState": "WA",
   "locationType": "city",
@@ -14,15 +16,17 @@
   "industryOrientation": 0.34,
   "tuitionPerCreditUsd": 1200,
   "references": {
-    "openCsUrl": "https://www.opencs.dev/",
-    "nicheUrl": "https://www.niche.com/graduate-schools/university-of-washington/programs/"
+    "openCsUrl": "https://opencs.app/grade/",
+    "nicheUrl": "https://www.niche.com/graduate-schools/university-of-washington/programs/",
+    "csOpenRankingsUrl": "https://drafty.cs.brown.edu/csopenrankings/"
   },
   "rankings": {
     "usNewsUndergrad": 7,
     "csrankings": 9,
-    "openCs": 8
+    "openCs": 8,
+    "csOpenRankings": 6
   },
   "notes": [
-    "Cohort size intentionally omitted to demonstrate missing-data rendering."
+    "Living cost intentionally omitted to demonstrate missing-data rendering."
   ]
 }

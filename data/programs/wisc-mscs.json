@@ -1,0 +1,13 @@
+{
+  "id": "wisc-mscs",
+  "schoolName": "University of Wisconsin-Madison",
+  "programName": "Master of Science in Computer Sciences",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSCS%40Wisc/"
+  },
+  "notes": [
+    "OpenCS tier: S",
+    "Seeded from the OpenCS grade list."
+  ]
+}

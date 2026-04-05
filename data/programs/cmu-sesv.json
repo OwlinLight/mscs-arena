@@ -1,0 +1,13 @@
+{
+  "id": "cmu-sesv",
+  "schoolName": "Carnegie Mellon University",
+  "programName": "Master of Software Engineering, Silicon Valley",
+  "degreeType": "MS",
+  "references": {
+    "openCsUrl": "https://opencs.app/SESV%40CMU/"
+  },
+  "notes": [
+    "OpenCS tier: A",
+    "Seeded from the OpenCS grade list."
+  ]
+}

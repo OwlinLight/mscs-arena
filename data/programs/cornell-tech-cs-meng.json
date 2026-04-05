@@ -1,0 +1,13 @@
+{
+  "id": "cornell-tech-cs-meng",
+  "schoolName": "Cornell Tech",
+  "programName": "Master of Engineering in Computer Science",
+  "degreeType": "MEng",
+  "references": {
+    "openCsUrl": "https://opencs.app/CS%20Meng%40Cornell%20Tech/"
+  },
+  "notes": [
+    "OpenCS tier: A+",
+    "Seeded from the OpenCS grade list."
+  ]
+}

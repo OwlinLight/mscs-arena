@@ -1,0 +1,13 @@
+{
+  "id": "princeton-msecs",
+  "schoolName": "Princeton University",
+  "programName": "Master of Science in Engineering in Computer Science",
+  "degreeType": "MSE",
+  "references": {
+    "openCsUrl": "https://opencs.app/MSECS%40Princeton/"
+  },
+  "notes": [
+    "OpenCS tier: SSS",
+    "Seeded from the OpenCS grade list."
+  ]
+}
