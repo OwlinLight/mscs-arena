@@ -3,6 +3,8 @@
   "schoolName": "Carnegie Mellon University",
   "programName": "Master of Science in Computer Science",
   "degreeType": "MS",
+  "acceptanceRate": 8,
+  "employerDensity": 140,
   "locationCity": "Pittsburgh",
   "locationState": "PA",
   "locationType": "city",
@@ -12,16 +14,18 @@
   "thesisOption": "Thesis optional",
   "researchOrientation": 0.66,
   "industryOrientation": 0.62,
-  "cohortSize": 60,
+  "livingCostUsd": 2100,
   "tuitionTotalUsd": 78200,
   "references": {
-    "openCsUrl": "https://www.opencs.dev/",
-    "nicheUrl": "https://www.niche.com/colleges/carnegie-mellon-university/"
+    "openCsUrl": "https://opencs.app/MSCS%40CMU/",
+    "nicheUrl": "https://www.niche.com/colleges/carnegie-mellon-university/",
+    "csOpenRankingsUrl": "https://drafty.cs.brown.edu/csopenrankings/"
   },
   "rankings": {
     "usNewsUndergrad": 4,
     "csrankings": 1,
-    "openCs": 3
+    "openCs": 3,
+    "csOpenRankings": 1
   },
   "notes": [
     "Credits reflect CMU's unit system for the sample dataset."

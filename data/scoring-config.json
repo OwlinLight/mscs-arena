@@ -8,6 +8,15 @@
       { "max": null, "grade": "E" }
     ]
   },
+  "acceptanceRate": {
+    "bands": [
+      { "max": 5, "grade": "A" },
+      { "max": 10, "grade": "B" },
+      { "max": 20, "grade": "C" },
+      { "max": 35, "grade": "D" },
+      { "max": null, "grade": "E" }
+    ]
+  },
   "tuition": {
     "estimatedCredits": 30,
     "bands": [
@@ -18,17 +27,22 @@
       { "max": null, "grade": "E" }
     ]
   },
-  "cohortSize": {
+  "livingCost": {
     "bands": [
-      { "max": 60, "grade": "A" },
-      { "max": 120, "grade": "B" },
-      { "max": 200, "grade": "C" },
-      { "max": 300, "grade": "D" },
+      { "max": 1500, "grade": "A" },
+      { "max": 2500, "grade": "B" },
+      { "max": 3500, "grade": "C" },
+      { "max": 4500, "grade": "D" },
       { "max": null, "grade": "E" }
     ]
   },
-  "locationType": {
-    "city": "A",
-    "suburb": "C"
+  "employerDensity": {
+    "bands": [
+      { "max": 50, "grade": "E" },
+      { "max": 100, "grade": "D" },
+      { "max": 200, "grade": "C" },
+      { "max": 350, "grade": "B" },
+      { "max": null, "grade": "A" }
+    ]
   }
 }

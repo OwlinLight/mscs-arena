@@ -9,7 +9,7 @@ export const RADAR_AXES = [
   { key: "majorScore" },
   { key: "difficultyScore" },
   { key: "locationScore" },
-  { key: "cohortScore" },
+  { key: "livingCostScore" },
   { key: "tuitionScore" },
 ] as const;
 
@@ -17,7 +17,6 @@ export const GRADE_ORDER = ["A", "B", "C", "D", "E"] as const;
 
 type Grade = (typeof GRADE_ORDER)[number];
 export type RadarAxisKey = (typeof RADAR_AXES)[number]["key"];
-type LocationType = "city" | "suburb";
 
 type Band = {
   max: number | null;
@@ -28,11 +27,13 @@ type RankingSet = {
   usNewsUndergrad?: number;
   csrankings?: number;
   openCs?: number;
+  csOpenRankings?: number;
 };
 
 type ReferenceSet = {
   openCsUrl?: string;
   nicheUrl?: string;
+  csOpenRankingsUrl?: string;
 };
 
 export type ProgramRecord = {
@@ -40,6 +41,8 @@ export type ProgramRecord = {
   schoolName: string;
   programName: string;
   degreeType: string;
+  acceptanceRate?: number;
+  employerDensity?: number;
   locationCity?: string;
   locationState?: string;
   locationType?: string;
@@ -49,7 +52,7 @@ export type ProgramRecord = {
   thesisOption?: string;
   researchOrientation?: number;
   industryOrientation?: number;
-  cohortSize?: number;
+  livingCostUsd?: number;
   tuitionTotalUsd?: number;
   tuitionPerCreditUsd?: number;
   references?: ReferenceSet;
@@ -69,14 +72,19 @@ export type ScoringConfig = {
   rankings: {
     bands: Band[];
   };
+  acceptanceRate: {
+    bands: Band[];
+  };
+  employerDensity: {
+    bands: Band[];
+  };
   tuition: {
     estimatedCredits: number;
     bands: Band[];
   };
-  cohortSize: {
+  livingCost: {
     bands: Band[];
   };
-  locationType: Record<LocationType, Grade>;
 };
 
 export type ValidationResult = {
@@ -92,7 +100,6 @@ export type ProgramView = ProgramRecord & {
 };
 
 const REQUIRED_STRING_FIELDS = ["id", "schoolName", "programName", "degreeType"] as const;
-const LOCATION_TYPES = new Set<LocationType>(["city", "suburb"]);
 const programIndexData = programIndexJson as ProgramIndexResponse;
 const scoringConfigData = scoringConfigJson as ScoringConfig;
 
@@ -116,16 +123,10 @@ export function loadScoringConfig(configResponse: ScoringConfig): ScoringConfig 
   }
 
   validateBands(configResponse.rankings?.bands, "rankings.bands");
+  validateBands(configResponse.acceptanceRate?.bands, "acceptanceRate.bands");
+  validateBands(configResponse.employerDensity?.bands, "employerDensity.bands");
   validateBands(configResponse.tuition?.bands, "tuition.bands");
-  validateBands(configResponse.cohortSize?.bands, "cohortSize.bands");
-
-  if (
-    !configResponse.locationType ||
-    typeof configResponse.locationType.city !== "string" ||
-    typeof configResponse.locationType.suburb !== "string"
-  ) {
-    throw new Error("Scoring config must define locationType.city and locationType.suburb.");
-  }
+  validateBands(configResponse.livingCost?.bands, "livingCost.bands");
 
   return configResponse;
 }
@@ -139,13 +140,11 @@ export function validateProgramRecord(record: Partial<ProgramRecord>): Validatio
     }
   }
 
-  if (record?.locationType && !LOCATION_TYPES.has(record.locationType as LocationType)) {
-    errors.push("locationType must be city or suburb");
-  }
-
   for (const numericField of [
+    "acceptanceRate",
+    "employerDensity",
     "creditHours",
-    "cohortSize",
+    "livingCostUsd",
     "tuitionTotalUsd",
     "tuitionPerCreditUsd",
   ] as const) {
@@ -159,14 +158,14 @@ export function validateProgramRecord(record: Partial<ProgramRecord>): Validatio
     }
   }
 
-  for (const rankingField of ["usNewsUndergrad", "csrankings", "openCs"] as const) {
+  for (const rankingField of ["usNewsUndergrad", "csrankings", "openCs", "csOpenRankings"] as const) {
     const value = record?.rankings?.[rankingField];
     if (value !== undefined && value !== null && (!Number.isInteger(value) || value <= 0)) {
       errors.push(`rankings.${rankingField} must be a positive integer when provided`);
     }
   }
 
-  for (const linkField of ["openCsUrl", "nicheUrl"] as const) {
+  for (const linkField of ["openCsUrl", "nicheUrl", "csOpenRankingsUrl"] as const) {
     const value = record?.references?.[linkField];
     if (value !== undefined && value !== null && typeof value !== "string") {
       errors.push(`references.${linkField} must be a string when provided`);
@@ -207,9 +206,9 @@ export function deriveProgramView(record: ProgramRecord, scoringConfig: ScoringC
     radarScores: {
       prestigeScore: gradeFromRank(record.rankings?.usNewsUndergrad, scoringConfig),
       majorScore: gradeFromRank(record.rankings?.csrankings, scoringConfig),
-      difficultyScore: gradeFromRank(record.rankings?.openCs, scoringConfig),
-      locationScore: gradeFromLocation(record.locationType, scoringConfig),
-      cohortScore: gradeFromCohortSize(record.cohortSize, scoringConfig),
+      difficultyScore: gradeFromAcceptanceRate(record.acceptanceRate, scoringConfig),
+      locationScore: gradeFromEmployerDensity(record.employerDensity, scoringConfig),
+      livingCostScore: gradeFromLivingCost(record.livingCostUsd, scoringConfig),
       tuitionScore: gradeFromTuition(
         record.tuitionTotalUsd,
         record.tuitionPerCreditUsd,
@@ -225,9 +224,9 @@ export function deriveProgramView(record: ProgramRecord, scoringConfig: ScoringC
         "CSRankings rank",
         formatRankDetail(record.rankings?.csrankings),
       ),
-      difficultyScore: formatRadarDetail("OpenCS rank", formatRankDetail(record.rankings?.openCs)),
-      locationScore: formatRadarDetail("Location", formatLocationDetail(record)),
-      cohortScore: formatRadarDetail("Cohort size", formatCountDetail(record.cohortSize, "students")),
+      difficultyScore: formatRadarDetail("Acceptance rate", formatAcceptanceRateDetail(record.acceptanceRate)),
+      locationScore: formatRadarDetail("Employer density", formatEmployerDensityDetail(record.employerDensity)),
+      livingCostScore: formatRadarDetail("Living cost", formatLivingCostDetail(record.livingCostUsd)),
       tuitionScore: formatRadarDetail("Tuition", formatTuitionDetail(record, scoringConfig)),
     },
   };
@@ -261,23 +260,31 @@ export function gradeFromRank(rank: number | undefined, scoringConfig: ScoringCo
   return gradeFromBands(rankValue, scoringConfig.rankings.bands);
 }
 
-export function gradeFromLocation(
-  locationType: string | undefined,
+export function gradeFromAcceptanceRate(
+  acceptanceRate: number | undefined,
   scoringConfig: ScoringConfig,
 ): Grade | null {
-  if (!locationType) return null;
-  if (!LOCATION_TYPES.has(locationType as LocationType)) return null;
-  return scoringConfig.locationType[locationType as LocationType] ?? null;
+  if (typeof acceptanceRate !== "number" || !Number.isFinite(acceptanceRate)) return null;
+  if (acceptanceRate < 0 || acceptanceRate > 100) return null;
+  return gradeFromBands(acceptanceRate, scoringConfig.acceptanceRate.bands);
 }
 
-export function gradeFromCohortSize(
-  cohortSize: number | undefined,
+export function gradeFromEmployerDensity(
+  employerDensity: number | undefined,
   scoringConfig: ScoringConfig,
 ): Grade | null {
-  if (typeof cohortSize !== "number" || !Number.isFinite(cohortSize)) return null;
-  const cohortValue: number = cohortSize;
-  if (cohortValue <= 0) return null;
-  return gradeFromBands(cohortValue, scoringConfig.cohortSize.bands);
+  if (typeof employerDensity !== "number" || !Number.isFinite(employerDensity)) return null;
+  if (employerDensity <= 0) return null;
+  return gradeFromBands(employerDensity, scoringConfig.employerDensity.bands);
+}
+
+export function gradeFromLivingCost(
+  livingCostUsd: number | undefined,
+  scoringConfig: ScoringConfig,
+): Grade | null {
+  if (typeof livingCostUsd !== "number" || !Number.isFinite(livingCostUsd)) return null;
+  if (livingCostUsd <= 0) return null;
+  return gradeFromBands(livingCostUsd, scoringConfig.livingCost.bands);
 }
 
 export function gradeFromTuition(
@@ -376,6 +383,30 @@ function formatCountDetail(value: number | undefined, unit: string): string {
   }
 
   return `${formatNumber(value)} ${unit}`;
+}
+
+function formatAcceptanceRateDetail(value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  return `${formatNumber(value)}%`;
+}
+
+function formatEmployerDensityDetail(value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  return formatNumber(value);
+}
+
+function formatLivingCostDetail(value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  return `${formatCurrency(value)} / month`;
 }
 
 function formatLocationDetail(record: ProgramRecord): string {

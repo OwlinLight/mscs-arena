@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import {
   formatCurrency as formatDisplayCurrency,
   formatDuration,
+  formatEmployerDensity,
+  formatLivingCost,
   formatLocation,
   formatNumber as formatDisplayNumber,
   getAxisDetail,
@@ -138,14 +140,18 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
               </div>
 
               <div className="filter-list" role="list">
-                {selectedSchools.map((school, index) => (
-                  <div key={`${school}-${index}`} className="filter-chip active static">
-                    <span className="filter-chip-label">
-                      {index === 0 ? "A" : "B"}: {school}
-                    </span>
-                    <span>1</span>
-                  </div>
-                ))}
+                {selectedSchools.map((school, index) => {
+                  const program = programs.find((candidate) => candidate.schoolName === school);
+
+                  return (
+                    <div key={`${school}-${index}`} className="filter-chip active static">
+                      <span className="filter-chip-label">
+                        {index === 0 ? "A" : "B"}: {school}
+                      </span>
+                      <RankingChip language={language} program={program ?? null} />
+                    </div>
+                  );
+                })}
               </div>
             </>
           ) : (
@@ -166,7 +172,7 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
               <div className="filter-list" role="list">
                 <div className="filter-chip active static">
                   <span className="filter-chip-label">{t.selected}: {selectedSchool}</span>
-                  <span>1</span>
+                  <RankingChip language={language} program={singleProgram} />
                 </div>
               </div>
             </>
@@ -204,6 +210,10 @@ export function ProgramBrowser({ language, programs }: ProgramBrowserProps) {
               language={language}
               leftProgram={comparedPrograms[0]}
               rightProgram={comparedPrograms[1]}
+              onSelectProgram={(schoolName) => {
+                setSelectedSchool(schoolName);
+                setMode("single");
+              }}
             />
 
             <section className="program-grid comparison-grid">
@@ -222,10 +232,12 @@ function ComparisonPanel({
   language,
   leftProgram,
   rightProgram,
+  onSelectProgram,
 }: {
   language: Language;
   leftProgram: ProgramView;
   rightProgram: ProgramView;
+  onSelectProgram: (schoolName: string) => void;
 }) {
   const t = translations[language].browser;
   const [activeAxis, setActiveAxis] = useState<RadarAxisKey>(RADAR_AXES[0].key);
@@ -240,14 +252,22 @@ function ComparisonPanel({
           </h2>
         </div>
         <div className="comparison-legend" aria-label={t.comparisonLegend}>
-          <span className="comparison-legend-item left">
+          <button
+            type="button"
+            className="comparison-legend-item left"
+            onClick={() => onSelectProgram(leftProgram.schoolName)}
+          >
             <i />
             {leftProgram.schoolName}
-          </span>
-          <span className="comparison-legend-item right">
+          </button>
+          <button
+            type="button"
+            className="comparison-legend-item right"
+            onClick={() => onSelectProgram(rightProgram.schoolName)}
+          >
             <i />
             {rightProgram.schoolName}
-          </span>
+          </button>
         </div>
       </div>
 
@@ -306,6 +326,12 @@ function ComparisonPanel({
 function ProgramCard({ language, program }: { language: Language; program: ProgramView }) {
   const t = translations[language].browser;
   const [activeAxis, setActiveAxis] = useState<RadarAxisKey>(RADAR_AXES[0].key);
+  const mapQuery = [program.schoolName, program.locationCity, program.locationState]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join(", ");
+  const mapEmbedUrl = mapQuery
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=14&output=embed`
+    : null;
 
   return (
     <article className="program-card">
@@ -395,7 +421,8 @@ function ProgramCard({ language, program }: { language: Language; program: Progr
           <InfoRow label={t.duration} value={program.duration ?? t.notAvailable} />
           <InfoRow label={t.credits} value={formatDisplayNumber(language, program.creditHours)} />
           <InfoRow label={t.location} value={formatLocation(language, program)} />
-          <InfoRow label={t.cohortSize} value={formatDisplayNumber(language, program.cohortSize)} />
+          <InfoRow label={t.employerDensity} value={formatEmployerDensity(language, program.employerDensity)} />
+          <InfoRow label={t.livingCost} value={formatLivingCost(language, program.livingCostUsd)} />
           <InfoRow label={t.thesisOption} value={program.thesisOption ?? t.notAvailable} />
           <InfoRow
             label={t.researchVsIndustryOrientation}
@@ -408,6 +435,7 @@ function ProgramCard({ language, program }: { language: Language; program: Progr
               `${t.rankingUsNews} ${program.rankings?.usNewsUndergrad ?? t.notAvailable}`,
               `${t.rankingCsrankings} ${program.rankings?.csrankings ?? t.notAvailable}`,
               `${t.rankingOpenCs} ${program.rankings?.openCs ?? t.notAvailable}`,
+              `${t.rankingCsOpen} ${program.rankings?.csOpenRankings ?? t.notAvailable}`,
             ].join(" / ")}
           />
           <InfoRow
@@ -427,6 +455,23 @@ function ProgramCard({ language, program }: { language: Language; program: Progr
           </ul>
         </section>
       )}
+
+      <section className="section-block">
+        <h3>{t.campusMap}</h3>
+        {mapEmbedUrl ? (
+          <div className="map-embed-shell">
+            <iframe
+              title={`${program.schoolName} map`}
+              src={mapEmbedUrl}
+              className="map-embed"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        ) : (
+          <p className="map-unavailable">{t.mapUnavailable}</p>
+        )}
+      </section>
     </article>
   );
 }
@@ -437,6 +482,33 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
+  );
+}
+
+function RankingChip({ language, program }: { language: Language; program: ProgramView | null }) {
+  const t = translations[language].browser;
+  const rank = program?.rankings?.csOpenRankings;
+  const url = program?.references?.csOpenRankingsUrl;
+
+  if (!Number.isFinite(rank)) {
+    return <span>{t.notAvailable}</span>;
+  }
+
+  if (!url) {
+    return <span className="filter-chip-rank">#{rank}</span>;
+  }
+
+  return (
+    <a
+      className="filter-chip-rank"
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={`${program.schoolName} ${t.rankingCsOpen} #${rank}`}
+      title={`${t.rankingCsOpen} #${rank}`}
+    >
+      {`#${rank}`}
+    </a>
   );
 }
 

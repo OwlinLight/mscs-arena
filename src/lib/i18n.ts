@@ -10,7 +10,7 @@ const AXIS_KEYS: RadarAxisKey[] = [
   "majorScore",
   "difficultyScore",
   "locationScore",
-  "cohortScore",
+  "livingCostScore",
   "tuitionScore",
 ];
 
@@ -73,12 +73,15 @@ export const translations = {
       perCredit: "per credit",
       duration: "Duration",
       credits: "Credits",
-      cohortSize: "Cohort size",
+      livingCost: "Living cost",
       thesisOption: "Thesis option",
       researchVsIndustryOrientation: "Research vs industry orientation",
+      employerDensity: "Employer density",
       rankingInputs: "Ranking inputs",
       notes: "Notes",
       validationDetails: "Validation details",
+      campusMap: "Campus map",
+      mapUnavailable: "Map unavailable for this program",
       programRadarChart: "Program radar chart",
       comparisonRadarChart: "Comparison radar chart",
       students: "students",
@@ -88,22 +91,24 @@ export const translations = {
       rankingUsNews: "US News",
       rankingCsrankings: "CSRankings",
       rankingOpenCs: "OpenCS",
+      rankingCsOpen: "CS Open Rankings",
+      rankingLinkLabel: "Rank",
       researchLeaning: "Research-leaning",
       industryLeaning: "Industry-leaning",
       balanced: "Balanced",
-      locationDetail: "Location",
+      locationDetail: "Employer density",
       tuitionDetail: "Tuition",
-      cohortDetail: "Cohort size",
+      livingCostDetail: "Living cost",
       prestigiousDetail: "US News undergrad rank",
       majorDetail: "CSRankings rank",
-      difficultyDetail: "OpenCS rank",
+      difficultyDetail: "Acceptance rate",
     },
     axes: {
       prestigeScore: "Prestigious",
       majorScore: "Major ranking",
-      difficultyScore: "Course load difficulty",
-      locationScore: "Location",
-      cohortScore: "Cohort size",
+      difficultyScore: "Acceptance rate",
+      locationScore: "Employer density",
+      livingCostScore: "Living cost",
       tuitionScore: "Tuition costs",
     },
   },
@@ -160,12 +165,15 @@ export const translations = {
       perCredit: "每学分",
       duration: "时长",
       credits: "学分",
-      cohortSize: "项目规模",
+      livingCost: "生活成本",
       thesisOption: "论文选项",
       researchVsIndustryOrientation: "科研 / 就业倾向",
+      employerDensity: "雇主密度",
       rankingInputs: "排名输入",
       notes: "备注",
       validationDetails: "校验详情",
+      campusMap: "校园地图",
+      mapUnavailable: "该项目暂无地图",
       programRadarChart: "项目雷达图",
       comparisonRadarChart: "对比雷达图",
       students: "人",
@@ -175,22 +183,24 @@ export const translations = {
       rankingUsNews: "US News",
       rankingCsrankings: "CSRankings",
       rankingOpenCs: "OpenCS",
+      rankingCsOpen: "CS Open Rankings",
+      rankingLinkLabel: "排名",
       researchLeaning: "偏科研",
       industryLeaning: "偏就业",
       balanced: "均衡",
-      locationDetail: "地点",
+      locationDetail: "雇主密度",
       tuitionDetail: "学费",
-      cohortDetail: "项目规模",
+      livingCostDetail: "生活成本",
       prestigiousDetail: "US News 本科排名",
       majorDetail: "CSRankings 排名",
-      difficultyDetail: "OpenCS 排名",
+      difficultyDetail: "录取率",
     },
     axes: {
       prestigeScore: "名气",
       majorScore: "专业排名",
-      difficultyScore: "课程负担难度",
-      locationScore: "地理位置",
-      cohortScore: "项目规模",
+      difficultyScore: "录取率",
+      locationScore: "雇主密度",
+      livingCostScore: "生活成本",
       tuitionScore: "学费成本",
     },
   },
@@ -222,11 +232,11 @@ export function getAxisDetail(language: Language, program: ProgramView, axisKey:
     case "majorScore":
       return `${browser.majorDetail}: ${formatRankDetail(language, program.rankings?.csrankings)}`;
     case "difficultyScore":
-      return `${browser.difficultyDetail}: ${formatRankDetail(language, program.rankings?.openCs)}`;
+      return `${browser.difficultyDetail}: ${formatAcceptanceRate(language, program.acceptanceRate)}`;
     case "locationScore":
-      return `${browser.locationDetail}: ${formatLocation(language, program)}`;
-    case "cohortScore":
-      return `${browser.cohortDetail}: ${formatCountDetail(language, program.cohortSize, browser.students)}`;
+      return `${browser.locationDetail}: ${formatEmployerDensity(language, program.employerDensity)}`;
+    case "livingCostScore":
+      return `${browser.livingCostDetail}: ${formatLivingCost(language, program.livingCostUsd)}`;
     case "tuitionScore":
       return `${browser.tuitionDetail}: ${formatTuition(language, program)}`;
   }
@@ -259,6 +269,30 @@ export function formatCurrency(language: Language, value: number | undefined): s
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+export function formatAcceptanceRate(language: Language, value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return translations[language].browser.notAvailable;
+  }
+
+  return `${formatNumber(language, value)}%`;
+}
+
+export function formatEmployerDensity(language: Language, value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return translations[language].browser.notAvailable;
+  }
+
+  return formatNumber(language, value);
+}
+
+export function formatLivingCost(language: Language, value: number | undefined): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return translations[language].browser.notAvailable;
+  }
+
+  return `${formatCurrency(language, value)} / month`;
 }
 
 export function formatNumber(language: Language, value: number | undefined): string {

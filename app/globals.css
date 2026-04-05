@@ -292,6 +292,7 @@ code {
   gap: 12px;
   align-items: center;
   width: 100%;
+  min-width: 0;
   padding: 12px 14px;
   border: 1px solid rgba(180, 83, 9, 0.16);
   border-radius: 18px;
@@ -306,7 +307,7 @@ code {
     background-color 180ms ease;
 }
 
-.filter-chip span {
+.filter-chip-rank {
   flex-shrink: 0;
   min-width: 1.75rem;
   padding: 3px 8px;
@@ -315,6 +316,11 @@ code {
   color: var(--muted);
   font-size: 0.84rem;
   text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .filter-chip:hover {
@@ -327,9 +333,15 @@ code {
   background: rgba(180, 83, 9, 0.12);
 }
 
-.filter-chip.active span {
+.filter-chip.active .filter-chip-rank {
   background: rgba(180, 83, 9, 0.18);
   color: var(--accent);
+}
+
+.filter-chip-rank:hover,
+.filter-chip-rank:focus-visible {
+  background: rgba(180, 83, 9, 0.26);
+  color: var(--text);
 }
 
 .filter-chip.static {
@@ -338,9 +350,17 @@ code {
 }
 
 .filter-chip-label {
+  flex: 1 1 auto;
   min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
   font-weight: 700;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
 }
 
 .comparison-panel {
@@ -378,10 +398,24 @@ code {
   gap: 8px;
   align-items: center;
   padding: 8px 12px;
+  border: 1px solid transparent;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.55);
   color: var(--text);
+  font: inherit;
   font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.comparison-legend-item:hover,
+.comparison-legend-item:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(180, 83, 9, 0.22);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .comparison-legend-item i {
@@ -807,6 +841,26 @@ code {
 
 .warning-list ul {
   margin-top: 0;
+}
+
+.map-embed-shell {
+  overflow: hidden;
+  border: 1px solid rgba(180, 83, 9, 0.18);
+  border-radius: 20px;
+  background: rgba(255, 248, 236, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.map-embed {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+.map-unavailable {
+  margin: 0;
+  color: var(--muted);
 }
 
 .empty-state {

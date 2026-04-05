@@ -3,6 +3,8 @@
   "schoolName": "Stanford University",
   "programName": "MS in Computer Science",
   "degreeType": "MS",
+  "acceptanceRate": 4,
+  "employerDensity": 220,
   "locationCity": "Stanford",
   "locationState": "CA",
   "locationType": "suburb",
@@ -12,19 +14,20 @@
   "thesisOption": "Thesis optional",
   "researchOrientation": 0.72,
   "industryOrientation": 0.48,
-  "cohortSize": 85,
+  "livingCostUsd": 3200,
   "tuitionTotalUsd": 64140,
   "references": {
-    "openCsUrl": "https://www.opencs.dev/",
-    "nicheUrl": "https://www.niche.com/colleges/stanford-university/"
+    "openCsUrl": "https://opencs.app/MSCS%40Stanford/",
+    "nicheUrl": "https://www.niche.com/colleges/stanford-university/",
+    "csOpenRankingsUrl": "https://drafty.cs.brown.edu/csopenrankings/"
   },
   "rankings": {
     "usNewsUndergrad": 3,
     "csrankings": 2,
-    "openCs": 4
+    "openCs": 4,
+    "csOpenRankings": 4
   },
   "notes": [
-    "Sample local record for UI scaffolding.",
-    "OpenCS link is a project placeholder until program-specific pages are curated."
+    "Sample local record for UI scaffolding."
   ]
 }
